@@ -1,0 +1,26 @@
+  .big {
+    font-size: 82px;
+  }
+  .small {
+    font-size: 30px;    
+  }
+
+  .bottom {
+    font-size: 20px;
+    position: absolute;
+    left: 50%;
+    width: 300px;
+    margin-left: -150px;
+    bottom:15px;
+    
+  }
+
+  body {
+    background-image: url("dotsLightGrey.gif");
+    background-repeat: repeat;
+
+    opacity: 1.0;
+    padding-top: 35px;
+    text-align: center;
+    font-family: "Montserrat", Arial, Helvetica, sans-serif;
+  }
