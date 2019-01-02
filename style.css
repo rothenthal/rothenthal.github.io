@@ -1,16 +1,19 @@
   .big {
+    letter-spacing: 0.15em;
     font-size: 82px;
   }
   .small {
+    letter-spacing: 0.12em;
     font-size: 30px;    
   }
 
   .bottom {
-    font-size: 20px;
+    letter-spacing: 0.11em;
+    font-size: 18px;
     position: absolute;
     left: 50%;
-    width: 300px;
-    margin-left: -150px;
+    width: 420px;
+    margin-left: -210px;
     bottom:15px;
     
   }
