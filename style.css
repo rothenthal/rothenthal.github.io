@@ -9,19 +9,23 @@
 
   .bottom {
     letter-spacing: 0.11em;
-    font-size: 18px;
+    font-size: 16px;
     position: absolute;
     left: 50%;
-    width: 420px;
-    margin-left: -210px;
+    width: 500px;
+    margin-left: -250px;
     bottom:15px;
     
+  }
+
+  
+  .bottomsmall {
+    font-size: 14px;    
   }
 
   body {
     background-image: url("dotsLightGrey.gif");
     background-repeat: repeat;
-
     opacity: 1.0;
     padding-top: 35px;
     text-align: center;
