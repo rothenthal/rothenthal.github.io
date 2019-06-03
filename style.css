@@ -1,3 +1,14 @@
+   body {
+    background-image: url("dotsLightGrey.gif");
+    background-repeat: repeat;
+    opacity: 1.0;
+    padding-top: 35px;
+    text-align: center;
+    font-family: "Montserrat", Arial, Helvetica, sans-serif;
+  } 
+  
+  
+  
   .big {
     letter-spacing: 0.15em;
     font-size: 82px;
@@ -14,8 +25,7 @@
     left: 50%;
     width: 600px;
     margin-left: -300px;
-    bottom:15px;
-    
+    bottom:15px;    
   }
 
   a {
@@ -23,10 +33,10 @@
     color: inherit;
     }
 
-    address { 
-      display: inherit;
-      font-style: inherit;
-    }
+  address { 
+    display: inherit;
+    font-style: inherit;
+  }
 
   .bottomsmall {
     font-size: 14px; 
@@ -34,11 +44,3 @@
     margin-top:  1px;   
   }
 
-  body {
-    background-image: url("dotsLightGrey.gif");
-    background-repeat: repeat;
-    opacity: 1.0;
-    padding-top: 35px;
-    text-align: center;
-    font-family: "Montserrat", Arial, Helvetica, sans-serif;
-  }
