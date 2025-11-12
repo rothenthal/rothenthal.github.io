@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Styled Decimal Input</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
+    min-height: 100vh;
+  }
+
+  .container {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  }
+
+  h2 {
+    color: #333;
+    margin-top: 0;
+  }
+
+  .input-group {
+    margin: 20px 0;
+  }
+
+  label, ul {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: 500;
+  }
+
+  .controls {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .separator-selector {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .separator-selector label {
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .separator-selector input[type="radio"] {
+    cursor: pointer;
+  }
+
+  select {
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: border-color 0.3s;
+  }
+
+  select:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+
+  .number-input {
+    font-size: 24px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    padding: 6px;
+    width: 100%;
+    box-sizing: border-box;
+    border: 3px solid #ddd;
+    border-radius: 6px;
+    transition: border-color 0.3s;
+    background: white;
+    color: #333;
+    /* min-height: 80px; */
+    text-align: right;
+  }
+
+  .number-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  .number-input:empty:before {
+    content: attr(data-placeholder);
+    color: #999;
+    font-weight: normal;
+  }
+
+  .decimal-part {
+    font-size: 0.7em;
+    vertical-align: baseline;
+    color: #777;
+  }
+
+  .thousand-sep::after {
+    /* Unicode Character 'THIN SPACE' (U+2009) content: '\2009'; */
+    content: '\2009';
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    color: #999;
+    pointer-events: none;
+  }
+
+  .info {
+    margin-top: 20px;
+    padding: 15px;
+    background: #e3f2fd;
+    border-left: 4px solid #2196f3;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #555;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h2>🔢 Styled Decimal Input</h2>
+
+
+    <div class="input-group">
+      <label for="numberInput">A custom number input that has:</label>
+      <ul>
+      <li>gaps as thousand separators</li>
+      <li>but gaps aren't included when copying the text</li>
+      <li>shows decimals in smaller font</li>
+      <li>allows international number formats</li>
+      </ul>
+
+      <!-- The contenteditable div acting as the number input -->
+      <div
+      id="numberInput"
+      class="number-input"
+      contenteditable="plaintext-only"
+      data-placeholder="enter a number..."
+      spellcheck="false"
+      style="white-space: nowrap; overflow-x: auto;">1234567.89</div>
+    </div>
+
+    <div class="controls">
+      <div class="separator-selector">
+        <span style="color: #555; font-weight: 500;">Decimal separator:</span>
+        <label>
+          <input type="radio" name="separator" value="." checked> Period <code>(.)</code>
+        </label>
+        <label>
+          <input type="radio" name="separator" value=","> Comma <code>(,)</code>
+        </label>
+      </div>
+    </div>
+
+    <div class="info">
+      💡 <strong>Tip:</strong> Choose your preferred decimal separator above (. or ,). You can paste numbers with either format. Use ↑/↓ arrow keys to increment/decrement by 1.
+    </div>
+
+    <div style="margin-top: 20px; padding: 15px; background: #f0f4ff; border-radius: 8px; border-left: 4px solid #667eea;">
+      <strong style="color: #555;">parsed float value:</strong>
+      <div id="floatValue" style="font-family: 'Courier New', monospace; font-size: 18px; margin-top: 8px; color: #667eea; font-weight: bold;">1234567.89</div>
+    </div>
+  </div>
+
+  <script>
+    const input = document.getElementById('numberInput');
+    const floatValueDisplay = document.getElementById('floatValue');
+    const separatorRadios = document.querySelectorAll('input[name="separator"]');
+    let decimalSeparator = '.';
+
+    // Listen for separator changes
+    separatorRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        decimalSeparator = e.target.value;
+        updateFormatting();
+      });
+    });
+
+    function getFloatValue() {
+      // Regex: <[^>]*> matches any HTML tag (< followed by any characters except >, then >)
+      // Regex: [^\d.,-] matches any character that is NOT a digit, period, comma, or minus
+      const cleanValue = input.textContent.replace(/<[^>]*>/g, '').replace(/[^\d.,-]/g, '');
+      // Regex: /,/g matches all commas globally (to replace them with periods for parsing)
+      const normalized = cleanValue.replace(/,/g, '.');
+      return parseFloat(normalized) || 0;
+    }
+
+    function updateFloatDisplay() {
+      floatValueDisplay.textContent = getFloatValue();
+    }
+
+    function formatNumber(value) {
+      // Remove any HTML tags first
+      // Regex: <[^>]*> matches any HTML tag (< followed by any characters except >, then >)
+      const cleanValue = value.replace(/<[^>]*>/g, '');
+
+      // Only allow numbers, decimal point, comma, and minus sign
+      // Regex: [^\d.,-] matches any character that is NOT a digit, period, comma, or minus
+      let sanitized = cleanValue.replace(/[^\d.,-]/g, '');
+
+      // Find the last occurrence of . or ,
+      const lastDot = sanitized.lastIndexOf('.');
+      const lastComma = sanitized.lastIndexOf(',');
+
+      // Use whichever comes last as the decimal separator
+      if (lastDot > -1 || lastComma > -1) {
+        const decimalPos = Math.max(lastDot, lastComma);
+        // Remove all dots and commas except the last one
+        // Regex: [.,] matches either a period or comma (to remove all separators)
+        const beforeDecimal = sanitized.slice(0, decimalPos).replace(/[.,]/g, '');
+        const afterDecimal = sanitized.slice(decimalPos + 1).replace(/[.,]/g, '');
+        sanitized = beforeDecimal + '.' + afterDecimal;
+      } else {
+        // No decimal separator found, just remove any stray dots/commas
+        // Regex: [.,] matches either a period or comma
+        sanitized = sanitized.replace(/[.,]/g, '');
+      }
+
+      if (sanitized === '' || sanitized === '-') {
+        return sanitized;
+      }
+
+      const parts = sanitized.split('.');
+      let integerPart = parts[0];
+      const decimalPart = parts[1];
+
+      // Remove leading zeros from integer part (but keep single 0)
+      const isNegative = integerPart.startsWith('-');
+      let absInteger = isNegative ? integerPart.slice(1) : integerPart;
+      // Regex: ^0+ matches one or more zeros at the start of the string
+      absInteger = absInteger.replace(/^0+/, '') || '0';
+
+      // Add thousand separators via CSS
+
+      // Reverse, add separators every 3 digits, then reverse back
+      const digits = absInteger.split('').reverse();
+      const withSeparators = [];
+
+      digits.forEach((digit, index) => {
+        if (index > 0 && index % 3 === 0) {
+          withSeparators.push(`<span class="thousand-sep">${digit}</span>`);
+        } else {
+          withSeparators.push(digit);
+        }
+      });
+
+      const formatted = withSeparators.reverse().join('');
+
+      integerPart = (isNegative ? '-' : '') + formatted;
+
+      if (decimalPart !== undefined) {
+        return `${integerPart}<span class="decimal-part">${decimalSeparator}${decimalPart}</span>`;
+      }
+      return integerPart;
+    }
+
+    function saveCursorPosition() {
+      const selection = window.getSelection();
+      if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const preCaretRange = range.cloneRange();
+        preCaretRange.selectNodeContents(input);
+        preCaretRange.setEnd(range.endContainer, range.endOffset);
+        return preCaretRange.toString().length;
+      }
+      return 0;
+    }
+
+    function restoreCursorPosition(pos) {
+      const selection = window.getSelection();
+      const range = document.createRange();
+
+      let charCount = 0;
+      let nodeStack = [input];
+      let node, foundStart = false;
+
+      while (!foundStart && (node = nodeStack.pop())) {
+        if (node.nodeType === 3) { // Text node
+          const nextCharCount = charCount + node.length;
+          if (pos <= nextCharCount) {
+            range.setStart(node, pos - charCount);
+            range.collapse(true);
+            foundStart = true;
+          }
+          charCount = nextCharCount;
+        } else {
+          let i = node.childNodes.length;
+          while (i--) {
+            nodeStack.push(node.childNodes[i]);
+          }
+        }
+      }
+
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+
+    function updateFormatting() {
+      const cursorPos = saveCursorPosition();
+      const text = input.textContent;
+      const formatted = formatNumber(text);
+
+      if (input.innerHTML !== formatted) {
+        const wasEmpty = input.textContent.trim() === '';
+        input.innerHTML = formatted;
+
+        // If input is now empty or was just cleared, keep focus and set cursor
+        if (wasEmpty || formatted === '' || formatted === '-') {
+          input.focus();
+          // Set cursor at the end
+          const range = document.createRange();
+          const selection = window.getSelection();
+          range.selectNodeContents(input);
+          range.collapse(false);
+          selection.removeAllRanges();
+          selection.addRange(range);
+        } else {
+          restoreCursorPosition(cursorPos);
+        }
+      }
+
+      updateFloatDisplay();
+    }
+
+    input.addEventListener('beforeinput', (e) => {
+      // Only validate insertText events
+      if (e.inputType === 'insertText' && e.data) {
+        // Allow only digits, minus, period, and comma
+        // Regex: ^[\d.,-]$ matches exactly one character that is a digit, period, comma, or minus
+        if (!/^[\d.,-]$/.test(e.data)) {
+          e.preventDefault();
+          return;
+        }
+
+        // Prevent leading zeros
+        if (e.data === '0') {
+          const selection = window.getSelection();
+          if (selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            const preCaretRange = range.cloneRange();
+            preCaretRange.selectNodeContents(input);
+            preCaretRange.setEnd(range.startContainer, range.startOffset);
+
+            // Get the text before cursor (without HTML tags)
+            // Regex: [^0-9.,-] matches any character that is NOT a digit, period, comma, or minus
+            const textBeforeCursor = preCaretRange.toString().replace(/[^0-9.,-]/g, '');
+
+            // Get text after cursor
+            const postCaretRange = range.cloneRange();
+            postCaretRange.selectNodeContents(input);
+            postCaretRange.setStart(range.endContainer, range.endOffset);
+            // Regex: [^0-9.,-] matches any character that is NOT a digit, period, comma, or minus
+            const textAfterCursor = postCaretRange.toString().replace(/[^0-9.,-]/g, '');
+
+            // Check if we're at the beginning or after leading zeros in integer part
+            // Regex: [.,] matches either a period or comma (decimal separators)
+            const beforeDecimal = textBeforeCursor.split(/[.,]/)[0];
+            const afterDecimal = textAfterCursor.split(/[.,]/)[0];
+
+            // Prevent if: at start and next char is digit, or after zeros and before digit
+            // Regex: ^-?0+$ matches strings that are: optional minus, followed by one or more zeros
+            // Regex: ^\d matches strings that start with a digit
+            if ((beforeDecimal === '' || beforeDecimal === '-' || /^-?0+$/.test(beforeDecimal)) &&
+                /^\d/.test(afterDecimal)) {
+              e.preventDefault();
+              return;
+            }
+          }
+        }
+      }
+    });
+
+    input.addEventListener('input', updateFormatting);
+    input.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text');
+      document.execCommand('insertText', false, text);
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        e.preventDefault();
+
+        // Get the clean numeric value
+        const cleanValue = input.textContent.replace(/<[^>]*>/g, '').replace(/[^\d.,-]/g, '');
+        let currentValue = parseFloat(cleanValue.replace(/,/g, '.')) || 0;
+
+        // Increment or decrement
+        if (e.key === 'ArrowUp') {
+          currentValue += 1;
+        } else {
+          currentValue -= 1;
+        }
+
+        // Update the input
+        input.textContent = currentValue.toString();
+        updateFormatting();
+
+        // Move cursor to end
+        const range = document.createRange();
+        const selection = window.getSelection();
+        range.selectNodeContents(input);
+        range.collapse(false);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    });
+
+    // Initialize
+    updateFormatting();
+  </script>
+</body>
+</html>
