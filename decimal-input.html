@@ -1,134 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Styled Decimal Input</title>
-<style>
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    max-width: 600px;
-    margin: 50px auto;
-    padding: 20px;
-    /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
-    min-height: 100vh;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Styled Decimal Input</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
+      min-height: 100vh;
+    }
 
-  .container {
-    background: white;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-  }
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
 
-  h2 {
-    color: #333;
-    margin-top: 0;
-  }
+    h2 {
+      color: #333;
+      margin-top: 0;
+    }
 
-  .input-group {
-    margin: 20px 0;
-  }
+    .input-group {
+      margin: 20px 0;
+    }
 
-  label, ul {
-    display: block;
-    margin-bottom: 8px;
-    color: #555;
-    font-weight: 500;
-  }
+    label,
+    ul {
+      display: block;
+      margin-bottom: 8px;
+      color: #555;
+      font-weight: 500;
+    }
 
-  .controls {
-    display: flex;
-    gap: 20px;
-    align-items: center;
-    margin-bottom: 15px;
-  }
+    .controls {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      margin-bottom: 15px;
+    }
 
-  .separator-selector {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
+    .separator-selector {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
 
-  .separator-selector label {
-    margin: 0;
-    font-size: 14px;
-  }
+    .separator-selector label {
+      margin: 0;
+      font-size: 14px;
+    }
 
-  .separator-selector input[type="radio"] {
-    cursor: pointer;
-  }
+    .separator-selector input[type="radio"] {
+      cursor: pointer;
+    }
 
-  select {
-    padding: 8px 12px;
-    border: 2px solid #ddd;
-    border-radius: 6px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: border-color 0.3s;
-  }
+    select {
+      padding: 8px 12px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: border-color 0.3s;
+    }
 
-  select:focus {
-    outline: none;
-    border-color: #667eea;
-  }
+    select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
 
-  .number-input {
-    font-size: 24px;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    padding: 6px;
-    width: 100%;
-    box-sizing: border-box;
-    border: 3px solid #ddd;
-    border-radius: 6px;
-    transition: border-color 0.3s;
-    background: white;
-    color: #333;
-    /* min-height: 80px; */
-    text-align: right;
-  }
+    .number-input {
+      font-size: 24px;
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      padding: 6px;
+      width: 100%;
+      box-sizing: border-box;
+      border: 3px solid #ddd;
+      border-radius: 6px;
+      transition: border-color 0.3s;
+      background: white;
+      color: #333;
+      /* min-height: 80px; */
+      text-align: right;
+    }
 
-  .number-input:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-  }
+    .number-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
 
-  .number-input:empty:before {
-    content: attr(data-placeholder);
-    color: #999;
-    font-weight: normal;
-  }
+    .number-input:empty:before {
+      content: attr(data-placeholder);
+      color: #999;
+      font-weight: normal;
+    }
 
-  .decimal-part {
-    font-size: 0.7em;
-    vertical-align: baseline;
-    color: #777;
-  }
+    .decimal-part {
+      font-size: 0.7em;
+      vertical-align: baseline;
+      color: #777;
+    }
 
-  .thousand-sep::after {
-    /* Unicode Character 'THIN SPACE' (U+2009) content: '\2009'; */
-    content: '\2009';
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    color: #999;
-    pointer-events: none;
-  }
+    .thousand-sep::after {
+      /* Unicode Character 'THIN SPACE' (U+2009) content: '\2009'; */
+      content: '\2009';
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      color: #999;
+      pointer-events: none;
+    }
 
-  .info {
-    margin-top: 20px;
-    padding: 15px;
-    background: #e3f2fd;
-    border-left: 4px solid #2196f3;
-    border-radius: 4px;
-    font-size: 14px;
-    color: #555;
-  }
-</style>
+    .info {
+      margin-top: 20px;
+      padding: 15px;
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+      border-radius: 4px;
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
 </head>
+
 <body>
   <div class="container">
     <h2>🔢 Styled Decimal Input</h2>
@@ -137,20 +140,15 @@
     <div class="input-group">
       <label for="numberInput">A custom number input that has:</label>
       <ul>
-      <li>gaps as thousand separators</li>
-      <li>but gaps aren't included when copying the text</li>
-      <li>shows decimals in smaller font</li>
-      <li>allows international number formats</li>
+        <li>gaps as thousand separators</li>
+        <li>but gaps aren't included when copying the text</li>
+        <li>shows decimals in smaller font</li>
+        <li>allows international number formats</li>
       </ul>
 
       <!-- The contenteditable div acting as the number input -->
-      <div
-      id="numberInput"
-      class="number-input"
-      contenteditable="plaintext-only"
-      data-placeholder="enter a number..."
-      spellcheck="false"
-      style="white-space: nowrap; overflow-x: auto;">1234567.89</div>
+      <div id="numberInput" class="number-input" contenteditable="plaintext-only" data-placeholder="enter a number..."
+        spellcheck="false" style="white-space: nowrap; overflow-x: auto;">1234567.89</div>
     </div>
 
     <div class="controls">
@@ -166,12 +164,16 @@
     </div>
 
     <div class="info">
-      💡 <strong>Tip:</strong> Choose your preferred decimal separator above (. or ,). You can paste numbers with either format. Use ↑/↓ arrow keys to increment/decrement by 1.
+      💡 <strong>Tip:</strong> Choose your preferred decimal separator above (. or ,). You can paste numbers with either
+      format. Use ↑/↓ arrow keys to increment/decrement by 1.
     </div>
 
-    <div style="margin-top: 20px; padding: 15px; background: #f0f4ff; border-radius: 8px; border-left: 4px solid #667eea;">
+    <div
+      style="margin-top: 20px; padding: 15px; background: #f0f4ff; border-radius: 8px; border-left: 4px solid #667eea;">
       <strong style="color: #555;">parsed float value:</strong>
-      <div id="floatValue" style="font-family: 'Courier New', monospace; font-size: 18px; margin-top: 8px; color: #667eea; font-weight: bold;">1234567.89</div>
+      <div id="floatValue"
+        style="font-family: 'Courier New', monospace; font-size: 18px; margin-top: 8px; color: #667eea; font-weight: bold;">
+        1234567.89</div>
     </div>
   </div>
 
@@ -374,7 +376,7 @@
             // Regex: ^-?0+$ matches strings that are: optional minus, followed by one or more zeros
             // Regex: ^\d matches strings that start with a digit
             if ((beforeDecimal === '' || beforeDecimal === '-' || /^-?0+$/.test(beforeDecimal)) &&
-                /^\d/.test(afterDecimal)) {
+              /^\d/.test(afterDecimal)) {
               e.preventDefault();
               return;
             }
@@ -405,6 +407,10 @@
           currentValue -= 1;
         }
 
+        // Round to 10 decimal places to avoid floating point precision errors
+        // Why: JavaScript floating point arithmetic can produce values like 1.7000000000000002 when decrementing 2.7 - 1
+        currentValue = Math.round(currentValue * 10000000000) / 10000000000;
+
         // Update the input
         input.textContent = currentValue.toString();
         updateFormatting();
@@ -423,4 +429,5 @@
     updateFormatting();
   </script>
 </body>
+
 </html>
