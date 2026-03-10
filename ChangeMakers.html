@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Change Makers — CREE in the ESG Era | Technical Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #00D26A;
+    --black: #111;
+    --white: #fff;
+    --grey: #f4f4f4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Space Mono', monospace;
+    background: var(--white);
+    color: var(--black);
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 3rem;
+    border-bottom: 3px solid var(--black);
+    position: sticky;
+    top: 0;
+    background: var(--white);
+    z-index: 100;
+  }
+  nav .logo {
+    font-family: 'Anton', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+  }
+  nav .logo:hover { transform: scale(1.05); }
+  nav .logo span { color: var(--green); }
+  nav ul {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+  }
+  nav ul li a {
+    text-decoration: none;
+    color: var(--black);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    position: relative;
+    transition: color 0.2s;
+  }
+  nav ul li a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 0;
+    width: 0; height: 2px;
+    background: var(--green);
+    transition: width 0.3s;
+  }
+  nav ul li a:hover { color: var(--green); }
+  nav ul li a:hover::after { width: 100%; }
+
+  /* ── HERO ── */
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 92vh;
+    border-bottom: 3px solid var(--black);
+    position: relative;
+  }
+
+  .hero-left {
+    padding: 4rem 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-left .edition-tag {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    writing-mode: vertical-lr;
+    position: absolute;
+    left: 3rem;
+    top: 4rem;
+    color: var(--black);
+    opacity: 0.7;
+  }
+
+  .hero-left .edition-tag::before {
+    content: '';
+    display: block;
+    width: 2px; height: 40px;
+    background: var(--green);
+    margin: 0 auto 12px;
+  }
+
+  .hero-title-block {
+    margin-left: 3rem;
+  }
+
+  .hero-title-block h1 {
+    font-family: 'Anton', sans-serif;
+    font-size: clamp(4rem, 8vw, 7.5rem);
+    line-height: 0.9;
+    text-transform: uppercase;
+    letter-spacing: -2px;
+  }
+  .hero-title-block h1 .line2 {
+    color: var(--green);
+    display: block;
+  }
+
+  .hero-subtitle {
+    margin-top: 2rem;
+    margin-left: 3rem;
+    font-size: 0.85rem;
+    line-height: 1.8;
+    max-width: 380px;
+    opacity: 0.8;
+  }
+  .hero-subtitle strong {
+    color: var(--green);
+  }
+
+  .hero-cta {
+    margin-top: 2.5rem;
+    margin-left: 3rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  .btn-primary {
+    background: var(--black);
+    color: var(--white);
+    padding: 0.9rem 2.2rem;
+    text-decoration: none;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: 2px solid var(--black);
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+  .btn-primary:hover {
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--black);
+  }
+  .btn-secondary {
+    background: transparent;
+    color: var(--black);
+    padding: 0.9rem 2.2rem;
+    text-decoration: none;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: 2px solid var(--black);
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+  .btn-secondary:hover {
+    background: var(--black);
+    color: var(--white);
+  }
+
+  /* Hero right — SVG mosaic */
+  .hero-right {
+    background: var(--black);
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    align-content: center;
+  }
+  .hero-right .mosaic-cell {
+    aspect-ratio: 1;
+    border: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .hero-right .mosaic-cell svg {
+    width: 100%;
+    height: 100%;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease, filter 0.4s ease;
+  }
+
+  /* ── MOSAIC HOVER ANIMATIONS — varied per cell ── */
+  /* Rotate */
+  .mosaic-cell:nth-child(4n+1):hover svg { transform: rotate(90deg) scale(1.1); }
+  /* Scale up */
+  .mosaic-cell:nth-child(4n+2):hover svg { transform: scale(1.3); }
+  /* Flip horizontal */
+  .mosaic-cell:nth-child(4n+3):hover svg { transform: scaleX(-1) scale(1.1); }
+  /* Spin 180 + scale */
+  .mosaic-cell:nth-child(4n+4):hover svg { transform: rotate(180deg) scale(1.15); }
+  /* Override a few for special effects */
+  .mosaic-cell:nth-child(6):hover svg { transform: rotate(-45deg) scale(1.2); }
+  .mosaic-cell:nth-child(9):hover svg { transform: rotateY(180deg) scale(1.1); perspective: 400px; }
+  .mosaic-cell:nth-child(11):hover svg { transform: scale(1.4); }
+  .mosaic-cell:nth-child(14):hover svg { transform: rotate(360deg); }
+  .mosaic-cell:nth-child(15):hover svg { transform: scaleY(-1) scale(1.1); }
+
+  /* Glow effect on mosaic hover */
+  .mosaic-cell:hover svg {
+    filter: drop-shadow(0 0 12px rgba(0, 210, 106, 0.5));
+  }
+  /* Background flash on cell hover */
+  .mosaic-cell {
+    transition: background 0.3s ease;
+  }
+  .mosaic-cell:hover {
+    background: rgba(0, 210, 106, 0.08);
+  }
+
+  .hero-right .overlay-text {
+    position: absolute;
+    bottom: 2rem;
+    right: 2rem;
+    font-family: 'Anton', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--white);
+    writing-mode: vertical-lr;
+    opacity: 0.25;
+  }
+
+  .quotemark {
+    position: absolute;
+    z-index: 2;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+    cursor: pointer;
+  }
+  .quotemark:hover {
+    transform: scale(1.3) rotate(-10deg);
+    opacity: 1 !important;
+  }
+  .quotemark:hover path { fill: var(--green); opacity: 0.6; }
+
+  /* ── AMBIENT PULSE on select mosaic cells ── */
+  @keyframes subtlePulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.04); opacity: 0.85; }
+  }
+  @keyframes subtleSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  .mosaic-cell:nth-child(3) svg { animation: subtlePulse 4s ease-in-out infinite; }
+  .mosaic-cell:nth-child(7) svg { animation: subtlePulse 5s ease-in-out infinite 1s; }
+  .mosaic-cell:nth-child(11) svg { animation: subtlePulse 6s ease-in-out infinite 0.5s; }
+  .mosaic-cell:nth-child(15) svg { animation: subtlePulse 4.5s ease-in-out infinite 1.5s; }
+  /* Override ambient on hover — hover takes priority */
+  .mosaic-cell:nth-child(3):hover svg,
+  .mosaic-cell:nth-child(7):hover svg,
+  .mosaic-cell:nth-child(11):hover svg,
+  .mosaic-cell:nth-child(15):hover svg {
+    animation: none;
+  }
+
+  /* ── PATTERN STRIP ── */
+  .pattern-strip {
+    height: 60px;
+    border-bottom: 3px solid var(--black);
+    display: flex;
+    overflow: hidden;
+  }
+  .pattern-strip svg { height: 100%; flex-shrink: 0; transition: transform 0.5s ease; }
+  .pattern-strip:hover svg { transform: scaleY(1.3); }
+
+  /* ── ABOUT SECTION ── */
+  .about {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 3px solid var(--black);
+  }
+  .about-left {
+    padding: 5rem 3rem;
+    border-right: 3px solid var(--black);
+  }
+  .about-left .section-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 1.5rem;
+  }
+  .about-left h2 {
+    font-family: 'Anton', sans-serif;
+    font-size: clamp(2.5rem, 4vw, 4rem);
+    text-transform: uppercase;
+    line-height: 1;
+    margin-bottom: 2rem;
+  }
+  .about-left p {
+    font-size: 0.85rem;
+    line-height: 1.9;
+    max-width: 480px;
+    opacity: 0.75;
+  }
+
+  .about-right {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .about-right .stat-cell {
+    border-bottom: 1.5px solid var(--black);
+    border-left: 0;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .about-right .stat-cell:nth-child(odd) {
+    border-right: 1.5px solid var(--black);
+  }
+  .about-right .stat-cell:nth-child(n+3) {
+    border-bottom: 0;
+  }
+  .stat-cell .stat-number {
+    font-family: 'Anton', sans-serif;
+    font-size: 3.5rem;
+    color: var(--green);
+    line-height: 1;
+  }
+  .stat-cell .stat-label {
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+    opacity: 0.6;
+  }
+  .stat-cell .stat-bg {
+    position: absolute;
+    right: -10px;
+    bottom: -10px;
+    opacity: 0.06;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+  }
+  .stat-cell {
+    transition: background 0.3s ease;
+    cursor: pointer;
+  }
+  .stat-cell:hover {
+    background: rgba(0, 210, 106, 0.04);
+  }
+  .stat-cell:hover .stat-bg {
+    transform: scale(1.4) rotate(15deg);
+    opacity: 0.15;
+  }
+  .stat-cell:hover .stat-number {
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform: scale(1.08);
+  }
+  .stat-cell .stat-number {
+    transition: transform 0.4s ease;
+  }
+
+  /* ── FEATURES SECTION ── */
+  .features {
+    padding: 5rem 3rem;
+    border-bottom: 3px solid var(--black);
+    position: relative;
+  }
+  .features .section-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 1.5rem;
+  }
+  .features h2 {
+    font-family: 'Anton', sans-serif;
+    font-size: clamp(2.5rem, 4vw, 4rem);
+    text-transform: uppercase;
+    line-height: 1;
+    margin-bottom: 3.5rem;
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+  }
+  .feature-card {
+    border: 1.5px solid var(--black);
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+    margin-right: -1.5px;
+    margin-bottom: -1.5px;
+  }
+  .feature-card:hover {
+    background: var(--green);
+  }
+  .feature-card:hover .feature-icon svg * {
+    fill: var(--black) !important;
+    stroke: var(--black) !important;
+    transition: fill 0.3s, stroke 0.3s;
+  }
+  .feature-card:hover .feature-number { color: var(--black); opacity: 0.3; }
+  .feature-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 1.5rem;
+  }
+  .feature-icon svg {
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+  }
+  /* Varied icon hover per card */
+  .feature-card:nth-child(1):hover .feature-icon svg { transform: rotate(90deg) scale(1.15); }
+  .feature-card:nth-child(2):hover .feature-icon svg { transform: scale(1.3); }
+  .feature-card:nth-child(3):hover .feature-icon svg { transform: rotate(-180deg); }
+  .feature-card:nth-child(4):hover .feature-icon svg { transform: scaleX(-1) scale(1.2); }
+  .feature-card:nth-child(5):hover .feature-icon svg { transform: rotate(45deg) scale(1.15); }
+  .feature-card:nth-child(6):hover .feature-icon svg { transform: rotate(360deg) scale(1.1); }
+  .feature-card:hover .feature-icon svg {
+    filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.2));
+  }
+  /* Number slides in on hover */
+  .feature-number {
+    font-family: 'Anton', sans-serif;
+    font-size: 5rem;
+    position: absolute;
+    top: -0.5rem;
+    right: 1rem;
+    color: var(--green);
+    opacity: 0.12;
+    line-height: 1;
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+  }
+  .feature-card:hover .feature-number {
+    transform: translateY(8px) scale(1.1);
+  }
+  .feature-card h3 {
+    font-family: 'Anton', sans-serif;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .feature-card p {
+    font-size: 0.78rem;
+    line-height: 1.8;
+    opacity: 0.7;
+  }
+  .feature-card:hover p { opacity: 1; }
+
+  /* ── MARQUEE ── */
+  .marquee-section {
+    border-bottom: 3px solid var(--black);
+    overflow: hidden;
+    padding: 1.5rem 0;
+    background: var(--green);
+  }
+  .marquee-track {
+    display: flex;
+    gap: 3rem;
+    animation: marquee 20s linear infinite;
+    width: max-content;
+  }
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .marquee-item {
+    font-family: 'Anton', sans-serif;
+    font-size: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    white-space: nowrap;
+    color: var(--black);
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+  }
+  .marquee-item .dot {
+    width: 12px; height: 12px;
+    background: var(--black);
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: dotPulse 2s ease-in-out infinite;
+  }
+  @keyframes dotPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.4); }
+  }
+
+  /* ── PROJECTS SECTION ── */
+  .projects {
+    border-bottom: 3px solid var(--black);
+  }
+  .projects-header {
+    padding: 5rem 3rem 3rem;
+  }
+  .projects-header .section-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 1.5rem;
+  }
+  .projects-header h2 {
+    font-family: 'Anton', sans-serif;
+    font-size: clamp(2.5rem, 4vw, 4rem);
+    text-transform: uppercase;
+    line-height: 1;
+  }
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .project-card {
+    border-top: 3px solid var(--black);
+    border-right: 3px solid var(--black);
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .project-card:last-child { border-right: 0; }
+  .project-card .project-visual {
+    height: 240px;
+    background: var(--grey);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-bottom: 2px solid var(--black);
+  }
+  .project-card .project-visual svg {
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.4s ease;
+  }
+  /* Project visual hover animations — each card different */
+  .project-card:nth-child(1):hover .project-visual svg { transform: rotate(8deg) scale(1.12); }
+  .project-card:nth-child(2):hover .project-visual svg { transform: scale(1.18) translateY(-8px); }
+  .project-card:nth-child(3):hover .project-visual svg { transform: rotate(-5deg) scale(1.1); }
+  .project-card:hover .project-visual svg {
+    filter: drop-shadow(0 4px 20px rgba(0, 210, 106, 0.25));
+  }
+  .project-card:hover .project-visual {
+    background: #eafff4;
+    transition: background 0.3s ease;
+  }
+  /* Lift card slightly on hover */
+  .project-card {
+    transition: box-shadow 0.3s ease;
+  }
+  .project-card:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  }
+  .project-card .project-info {
+    padding: 2rem;
+  }
+  .project-card .project-tag {
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--green);
+    font-weight: 700;
+    margin-bottom: 0.7rem;
+  }
+  .project-card h3 {
+    font-family: 'Anton', sans-serif;
+    font-size: 1.6rem;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+  .project-card p {
+    font-size: 0.78rem;
+    line-height: 1.8;
+    opacity: 0.65;
+  }
+  .project-card .project-link {
+    display: inline-block;
+    margin-top: 1.2rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--black);
+    text-decoration: none;
+    border-bottom: 2px solid var(--green);
+    padding-bottom: 2px;
+    transition: color 0.2s, padding-left 0.3s;
+  }
+  .project-card .project-link:hover { color: var(--green); padding-left: 8px; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--black);
+    color: var(--white);
+    padding: 4rem 3rem 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 3rem;
+  }
+  footer .footer-brand .logo {
+    font-family: 'Anton', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  footer .footer-brand .logo span { color: var(--green); }
+  footer .footer-brand p {
+    font-size: 0.75rem;
+    line-height: 1.8;
+    opacity: 0.5;
+    max-width: 300px;
+  }
+  footer h4 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+    color: var(--green);
+  }
+  footer ul { list-style: none; }
+  footer ul li { margin-bottom: 0.6rem; }
+  footer ul li a {
+    color: var(--white);
+    opacity: 0.5;
+    text-decoration: none;
+    font-size: 0.75rem;
+    transition: opacity 0.2s;
+  }
+  footer ul li a:hover { opacity: 1; color: var(--green); }
+  .footer-bottom {
+    grid-column: 1 / -1;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.7rem;
+    opacity: 0.35;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .hero-title-block { animation: fadeUp 0.8s ease-out; }
+  .hero-subtitle { animation: fadeUp 0.8s ease-out 0.15s both; }
+  .hero-meta { animation: fadeUp 0.8s ease-out 0.22s both; }
+  .hero-cta { animation: fadeUp 0.8s ease-out 0.3s both; }
+
+  @keyframes cellReveal {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .mosaic-cell { animation: cellReveal 0.5s ease-out both; }
+  .mosaic-cell:nth-child(1) { animation-delay: 0.1s; }
+  .mosaic-cell:nth-child(2) { animation-delay: 0.18s; }
+  .mosaic-cell:nth-child(3) { animation-delay: 0.24s; }
+  .mosaic-cell:nth-child(4) { animation-delay: 0.3s; }
+  .mosaic-cell:nth-child(5) { animation-delay: 0.16s; }
+  .mosaic-cell:nth-child(6) { animation-delay: 0.22s; }
+  .mosaic-cell:nth-child(7) { animation-delay: 0.28s; }
+  .mosaic-cell:nth-child(8) { animation-delay: 0.34s; }
+  .mosaic-cell:nth-child(9) { animation-delay: 0.2s; }
+  .mosaic-cell:nth-child(10) { animation-delay: 0.26s; }
+  .mosaic-cell:nth-child(11) { animation-delay: 0.32s; }
+  .mosaic-cell:nth-child(12) { animation-delay: 0.38s; }
+  .mosaic-cell:nth-child(13) { animation-delay: 0.25s; }
+  .mosaic-cell:nth-child(14) { animation-delay: 0.31s; }
+  .mosaic-cell:nth-child(15) { animation-delay: 0.37s; }
+  .mosaic-cell:nth-child(16) { animation-delay: 0.43s; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-right { min-height: 50vh; }
+    .about { grid-template-columns: 1fr; }
+    .about-left { border-right: 0; border-bottom: 3px solid var(--black); }
+    .features-grid { grid-template-columns: 1fr; }
+    .projects-grid { grid-template-columns: 1fr; }
+    .project-card { border-right: 0 !important; }
+    footer { grid-template-columns: 1fr; }
+    nav ul { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════ NAV ════════════ -->
+<nav>
+  <div class="logo">Change<span>Makers</span></div>
+  <ul>
+    <li><a href="#about">About the Event</a></li>
+    <li><a href="#features">Agenda</a></li>
+    <li><a href="#speakers">Speaker</a></li>
+    <li><a href="#contact">Register</a></li>
+  </ul>
+</nav>
+
+<!-- ════════════ HERO ════════════ -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="edition-tag">Technical Edition</div>
+    <div class="hero-title-block">
+      <h1>
+        Change<br>
+        <span class="line2">Makers</span>
+      </h1>
+    </div>
+    <p class="hero-subtitle">
+      <strong>CREE in the ESG Era</strong> — From Compliance to Competitive Advantage.<br>
+      Where the CREE System delivers strong answers — and where it needs allies.
+    </p>
+    <div class="hero-meta" style="margin-top:1.5rem;margin-left:3rem;font-size:0.75rem;letter-spacing:1px;text-transform:uppercase;opacity:0.6;line-height:2;">
+      Online Event &mdash; Wednesday, Mar 25, 2025<br>
+      3:00 PM – 4:00 PM CET
+    </div>
+    <div class="hero-cta">
+      <a class="btn-primary" href="#contact">Register Now</a>
+      <a class="btn-secondary" href="#features">View Agenda</a>
+    </div>
+
+    <!-- Decorative quotemark -->
+    <svg class="quotemark" style="left:3rem;bottom:3rem;" width="60" height="50" viewBox="0 0 60 50" fill="none">
+      <path d="M0 50V30C0 13.4 10.7 3.3 26 0l3 7C18.3 10 13 17.3 12 26h14v24H0Zm34 0V30C34 13.4 44.7 3.3 60 0l3 7C52.3 10 47 17.3 46 26h14v24H34Z" fill="var(--green)" opacity="0.15"/>
+    </svg>
+  </div>
+
+  <div class="hero-right">
+    <!-- Row 1 -->
+    <div class="mosaic-cell">
+      <!-- Half circle top-right -->
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none"><circle cx="100" cy="0" r="80" fill="var(--green)"/></svg>
+    </div>
+    <div class="mosaic-cell">
+      <!-- Dot grid -->
+      <svg viewBox="0 0 100 100">
+        <g fill="var(--green)" opacity="0.6">
+          <circle cx="15" cy="15" r="4"/><circle cx="38" cy="15" r="4"/><circle cx="61" cy="15" r="4"/><circle cx="84" cy="15" r="4"/>
+          <circle cx="15" cy="38" r="4"/><circle cx="38" cy="38" r="4"/><circle cx="61" cy="38" r="4"/><circle cx="84" cy="38" r="4"/>
+          <circle cx="15" cy="61" r="4"/><circle cx="38" cy="61" r="4"/><circle cx="61" cy="61" r="4"/><circle cx="84" cy="61" r="4"/>
+          <circle cx="15" cy="84" r="4"/><circle cx="38" cy="84" r="4"/><circle cx="61" cy="84" r="4"/><circle cx="84" cy="84" r="4"/>
+        </g>
+      </svg>
+    </div>
+    <div class="mosaic-cell">
+      <!-- Triangles -->
+      <svg viewBox="0 0 100 100">
+        <polygon points="0,100 50,0 100,100" fill="var(--green)"/>
+      </svg>
+    </div>
+    <div class="mosaic-cell">
+      <!-- Diagonal stripes -->
+      <svg viewBox="0 0 100 100">
+        <defs><pattern id="diag1" width="14" height="14" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><rect width="7" height="14" fill="var(--green)" opacity="0.5"/></pattern></defs>
+        <rect width="100" height="100" fill="url(#diag1)"/>
+      </svg>
+    </div>
+
+    <!-- Row 2 -->
+    <div class="mosaic-cell">
+      <!-- Horizontal lines -->
+      <svg viewBox="0 0 100 100">
+        <g stroke="var(--green)" stroke-width="5" opacity="0.5">
+          <line x1="0" y1="12" x2="100" y2="12"/><line x1="0" y1="30" x2="100" y2="30"/>
+          <line x1="0" y1="48" x2="100" y2="48"/><line x1="0" y1="66" x2="100" y2="66"/>
+          <line x1="0" y1="84" x2="100" y2="84"/>
+        </g>
+      </svg>
+    </div>
+    <div class="mosaic-cell">
+      <!-- Large quotemark -->
+      <svg viewBox="0 0 100 100">
+        <path d="M10 80V50C10 30 22 18 42 14l3 8C32 26 27 34 26 44h16v36H10Zm38 0V50C48 30 60 18 80 14l3 8C70 26 65 34 64 44h16v36H48Z" fill="var(--green)"/>
+      </svg>
+    </div>
+    <div class="mosaic-cell">
+      <!-- Half circle bottom -->
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none"><circle cx="50" cy="100" r="50" fill="var(--green)" opacity="0.7"/></svg>
+    </div>
+    <div class="mosaic-cell">
+      <!-- Checkerboard -->
+      <svg viewBox="0 0 100 100">
+        <g fill="var(--green)" opacity="0.4">
+          <rect x="0" y="0" width="25" height="25"/><rect x="50" y="0" width="25" height="25"/>
+          <rect x="25" y="25" width="25" height="25"/><rect x="75" y="25" width="25" height="25"/>
+          <rect x="0" y="50" width="25" height="25"/><rect x="50" y="50" width="25" height="25"/>
+          <rect x="25" y="75" width="25" height="25"/><rect x="75" y="75" width="25" height="25"/>
+        </g>
+      </svg>
+    </div>
+
+    <!-- Row 3 -->
+    <div class="mosaic-cell">
+      <!-- Quarter circle -->
+      <svg viewBox="0 0 100 100"><path d="M0 0 A100 100 0 0 1 100 100 L0 100Z" fill="var(--green)" opacity="0.6"/></svg>
+    </div>
+    <div class="mosaic-cell">
+      <!-- Cross -->
+      <svg viewBox="0 0 100 100">
+        <rect x="38" y="10" width="24" height="80" fill="var(--green)"/>
+        <rect x="10" y="38" width="80" height="24" fill="var(--green)"/>
+      </svg>
+    </div>
+    <div class="mosaic-cell">
+      <!-- Concentric circles -->
+      <svg viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="45" fill="none" stroke="var(--green)" stroke-width="4"/>
+        <circle cx="50" cy="50" r="32" fill="none" stroke="var(--green)" stroke-width="4" opacity="0.7"/>
+        <circle cx="50" cy="50" r="19" fill="none" stroke="var(--green)" stroke-width="4" opacity="0.4"/>
+        <circle cx="50" cy="50" r="6" fill="var(--green)"/>
+      </svg>
+    </div>
+    <div class="mosaic-cell">
+      <!-- Diamond -->
+      <svg viewBox="0 0 100 100"><polygon points="50,5 95,50 50,95 5,50" fill="var(--green)" opacity="0.5"/></svg>
+    </div>
+
+    <!-- Row 4 -->
+    <div class="mosaic-cell">
+      <!-- Small triangles pattern -->
+      <svg viewBox="0 0 100 100">
+        <g fill="var(--green)">
+          <polygon points="0,33 16.5,0 33,33"/><polygon points="33,33 49.5,0 66,33"/>
+          <polygon points="66,33 82.5,0 100,33" opacity="0.6"/>
+          <polygon points="16.5,66 33,33 49.5,66" opacity="0.6"/><polygon points="49.5,66 66,33 82.5,66"/>
+          <polygon points="0,100 16.5,66 33,100"/><polygon points="33,100 49.5,66 66,100" opacity="0.6"/>
+          <polygon points="66,100 82.5,66 100,100"/>
+        </g>
+      </svg>
+    </div>
+    <div class="mosaic-cell">
+      <!-- Circle half -->
+      <svg viewBox="0 0 100 100">
+        <path d="M50 0 A50 50 0 0 1 50 100Z" fill="var(--green)"/>
+      </svg>
+    </div>
+    <div class="mosaic-cell">
+      <!-- Pac-man style -->
+      <svg viewBox="0 0 100 100">
+        <path d="M50 50 L90 20 A50 50 0 1 1 90 80Z" fill="var(--green)" opacity="0.8"/>
+      </svg>
+    </div>
+    <div class="mosaic-cell">
+      <!-- Vertical stripes -->
+      <svg viewBox="0 0 100 100">
+        <g fill="var(--green)">
+          <rect x="5" y="0" width="10" height="100"/><rect x="25" y="0" width="10" height="100" opacity="0.7"/>
+          <rect x="45" y="0" width="10" height="100"/><rect x="65" y="0" width="10" height="100" opacity="0.7"/>
+          <rect x="85" y="0" width="10" height="100"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="overlay-text">ESG ESG ESG ESG ESG ESG</div>
+  </div>
+</section>
+
+<!-- ════════════ PATTERN STRIP ════════════ -->
+<div class="pattern-strip">
+  <svg viewBox="0 0 1200 60" width="1200" preserveAspectRatio="none">
+    <defs>
+      <pattern id="stripDots" width="20" height="20" patternUnits="userSpaceOnUse">
+        <circle cx="10" cy="10" r="3" fill="var(--green)"/>
+      </pattern>
+      <pattern id="stripLines" width="12" height="12" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+        <rect width="6" height="12" fill="var(--black)"/>
+      </pattern>
+    </defs>
+    <rect x="0" y="0" width="200" height="60" fill="url(#stripDots)"/>
+    <rect x="200" y="0" width="200" height="60" fill="var(--green)"/>
+    <rect x="400" y="0" width="200" height="60" fill="url(#stripLines)" opacity="0.08"/>
+    <circle cx="700" cy="30" r="25" fill="var(--green)"/>
+    <rect x="800" y="0" width="200" height="60" fill="url(#stripDots)"/>
+    <polygon points="1000,60 1060,0 1120,60" fill="var(--green)" opacity="0.5"/>
+    <polygon points="1060,60 1120,0 1180,60" fill="var(--black)" opacity="0.08"/>
+  </svg>
+</div>
+
+<!-- ════════════ ABOUT ════════════ -->
+<section class="about" id="about">
+  <div class="about-left">
+    <div class="section-label">Event Overview</div>
+    <h2>From ESG<br>Requirements to<br>Building Reality</h2>
+    <p>
+      This session is not about explaining ESG and regulatory basics.
+      It is about understanding what clients, investors and regulators
+      are truly asking for — and where the CREE System already
+      delivers strong answers. And just as important: where do we need
+      strategic partners, where are the current gaps, and how do we
+      position ourselves as a network?
+    </p>
+    <p style="margin-top:1.2rem;">
+      This event will feature a presentation followed by an engaging discussion,
+      allowing participants to share experiences, insights, and best practices.
+    </p>
+  </div>
+  <div class="about-right">
+    <div class="stat-cell">
+      <div class="stat-number" style="font-size:2.2rem;">MAR 25</div>
+      <div class="stat-label">Event Date 2025</div>
+      <svg class="stat-bg" width="120" height="120" viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="var(--green)"/></svg>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-number" style="font-size:2.5rem;">3 PM</div>
+      <div class="stat-label">CET Start Time</div>
+      <svg class="stat-bg" width="120" height="120" viewBox="0 0 120 120"><polygon points="60,5 115,95 5,95" fill="var(--green)"/></svg>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-number">60</div>
+      <div class="stat-label">Minutes Duration</div>
+      <svg class="stat-bg" width="120" height="120" viewBox="0 0 120 120"><rect x="10" y="10" width="100" height="100" fill="var(--green)"/></svg>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-number" style="font-size:1.8rem;">Online</div>
+      <div class="stat-label">Virtual Event</div>
+      <svg class="stat-bg" width="120" height="120" viewBox="0 0 120 120"><path d="M60 0 A60 60 0 0 1 60 120Z" fill="var(--green)"/></svg>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ AGENDA ════════════ -->
+<section class="features" id="features">
+  <div class="section-label">Agenda Highlights</div>
+  <h2>What We'll<br>Cover</h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-number">01</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 64 64" fill="none">
+          <rect x="4" y="4" width="56" height="56" stroke="var(--green)" stroke-width="3"/>
+          <circle cx="32" cy="32" r="16" fill="var(--green)" opacity="0.3"/>
+          <line x1="4" y1="4" x2="60" y2="60" stroke="var(--green)" stroke-width="2"/>
+        </svg>
+      </div>
+      <h3>EU Regulatory Framework</h3>
+      <p>An overview of the current EU regulatory landscape for ESG in the building sector, and what it means in practice for CREE partners.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-number">02</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 64 64" fill="none">
+          <polygon points="32,2 62,52 2,52" stroke="var(--green)" stroke-width="3" fill="var(--green)" fill-opacity="0.15"/>
+          <polygon points="32,18 48,46 16,46" fill="var(--green)" opacity="0.4"/>
+        </svg>
+      </div>
+      <h3>Member State Snapshots</h3>
+      <p>Implementation snapshots across member states — how different markets are translating EU-level directives into local requirements.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-number">03</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="28" stroke="var(--green)" stroke-width="3"/>
+          <circle cx="32" cy="32" r="16" stroke="var(--green)" stroke-width="2" opacity="0.5"/>
+          <circle cx="32" cy="32" r="5" fill="var(--green)"/>
+        </svg>
+      </div>
+      <h3>Relevance to Buildings</h3>
+      <p>How ESG regulation directly impacts building design, construction and operations — and why timber hybrid systems have an inherent advantage.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-number">04</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M4 60 L20 20 L36 40 L52 10 L60 30" stroke="var(--green)" stroke-width="3" fill="none"/>
+          <circle cx="20" cy="20" r="4" fill="var(--green)"/>
+          <circle cx="36" cy="40" r="4" fill="var(--green)"/>
+          <circle cx="52" cy="10" r="4" fill="var(--green)"/>
+        </svg>
+      </div>
+      <h3>DGNB as a Bridge</h3>
+      <p>DGNB certification as the connecting layer between regulatory frameworks and real building performance — and how CREE aligns.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-number">05</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 64 64" fill="none">
+          <rect x="8" y="8" width="20" height="20" fill="var(--green)" opacity="0.6"/>
+          <rect x="36" y="8" width="20" height="20" fill="var(--green)" opacity="0.3"/>
+          <rect x="8" y="36" width="20" height="20" fill="var(--green)" opacity="0.3"/>
+          <rect x="36" y="36" width="20" height="20" fill="var(--green)"/>
+        </svg>
+      </div>
+      <h3>Where CREE Fits</h3>
+      <p>The strengths of the CREE System in an ESG context — embodied carbon, material efficiency, speed, and circularity potential.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-number">06</div>
+      <div class="feature-icon">
+        <svg viewBox="0 0 64 64" fill="none">
+          <path d="M32 4 L32 60" stroke="var(--green)" stroke-width="3"/>
+          <path d="M4 32 L60 32" stroke="var(--green)" stroke-width="3"/>
+          <circle cx="32" cy="32" r="12" fill="var(--green)" opacity="0.2"/>
+          <path d="M16 16 L48 48" stroke="var(--green)" stroke-width="2" opacity="0.5"/>
+          <path d="M48 16 L16 48" stroke="var(--green)" stroke-width="2" opacity="0.5"/>
+        </svg>
+      </div>
+      <h3>The Honest Gap</h3>
+      <p>Operational phase data, knowledge flow, and the need for strategic allies — an honest look at where the network must grow together.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ MARQUEE ════════════ -->
+<div class="marquee-section">
+  <div class="marquee-track">
+    <span class="marquee-item">Change Makers <span class="dot"></span></span>
+    <span class="marquee-item">ESG <span class="dot"></span></span>
+    <span class="marquee-item">CREE System <span class="dot"></span></span>
+    <span class="marquee-item">Timber Hybrid <span class="dot"></span></span>
+    <span class="marquee-item">Compliance <span class="dot"></span></span>
+    <span class="marquee-item">DGNB <span class="dot"></span></span>
+    <span class="marquee-item">Circularity <span class="dot"></span></span>
+    <span class="marquee-item">Sustainability <span class="dot"></span></span>
+    <!-- Duplicate for seamless loop -->
+    <span class="marquee-item">Change Makers <span class="dot"></span></span>
+    <span class="marquee-item">ESG <span class="dot"></span></span>
+    <span class="marquee-item">CREE System <span class="dot"></span></span>
+    <span class="marquee-item">Timber Hybrid <span class="dot"></span></span>
+    <span class="marquee-item">Compliance <span class="dot"></span></span>
+    <span class="marquee-item">DGNB <span class="dot"></span></span>
+    <span class="marquee-item">Circularity <span class="dot"></span></span>
+    <span class="marquee-item">Sustainability <span class="dot"></span></span>
+  </div>
+</div>
+
+<!-- ════════════ SPEAKER & KEY QUESTIONS ════════════ -->
+<section class="projects" id="speakers">
+  <div class="projects-header">
+    <div class="section-label">Speaker &amp; Key Questions</div>
+    <h2>Who &amp; What</h2>
+  </div>
+  <div class="projects-grid">
+    <div class="project-card">
+      <div class="project-visual">
+        <svg viewBox="0 0 400 240">
+          <rect width="400" height="240" fill="#f4f4f4"/>
+          <!-- Abstract person silhouette -->
+          <circle cx="200" cy="85" r="40" fill="var(--green)" opacity="0.3"/>
+          <circle cx="200" cy="85" r="28" fill="var(--green)" opacity="0.45"/>
+          <rect x="155" y="130" width="90" height="70" rx="20" fill="var(--green)" opacity="0.25"/>
+          <line x1="0" y1="200" x2="400" y2="200" stroke="var(--black)" stroke-width="1" opacity="0.08"/>
+        </svg>
+      </div>
+      <div class="project-info">
+        <div class="project-tag">Presenter</div>
+        <h3>Elif Istanbulluoglu</h3>
+        <p>Leading the session on ESG regulatory frameworks and the strategic positioning of the CREE System in an evolving market.</p>
+        <a href="#contact" class="project-link">Connect →</a>
+      </div>
+    </div>
+    <div class="project-card">
+      <div class="project-visual">
+        <svg viewBox="0 0 400 240">
+          <rect width="400" height="240" fill="#f4f4f4"/>
+          <!-- Network nodes -->
+          <circle cx="120" cy="80" r="20" fill="var(--green)" opacity="0.4"/>
+          <circle cx="280" cy="80" r="20" fill="var(--green)" opacity="0.6"/>
+          <circle cx="200" cy="170" r="20" fill="var(--green)" opacity="0.5"/>
+          <line x1="120" y1="80" x2="280" y2="80" stroke="var(--green)" stroke-width="2" opacity="0.3"/>
+          <line x1="120" y1="80" x2="200" y2="170" stroke="var(--green)" stroke-width="2" opacity="0.3"/>
+          <line x1="280" y1="80" x2="200" y2="170" stroke="var(--green)" stroke-width="2" opacity="0.3"/>
+          <circle cx="120" cy="80" r="8" fill="var(--green)"/>
+          <circle cx="280" cy="80" r="8" fill="var(--green)"/>
+          <circle cx="200" cy="170" r="8" fill="var(--green)"/>
+        </svg>
+      </div>
+      <div class="project-info">
+        <div class="project-tag">Key Questions</div>
+        <h3>Strategic Partnerships</h3>
+        <p>Where do we need strategic partners? Where are the current gaps? How do we position ourselves as a network in the ESG landscape?</p>
+        <a href="#features" class="project-link">See Agenda →</a>
+      </div>
+    </div>
+    <div class="project-card">
+      <div class="project-visual">
+        <svg viewBox="0 0 400 240">
+          <rect width="400" height="240" fill="#f4f4f4"/>
+          <!-- Speech bubbles -->
+          <rect x="60" y="40" width="140" height="70" rx="12" fill="var(--green)" opacity="0.25"/>
+          <polygon points="120,110 130,130 140,110" fill="var(--green)" opacity="0.25"/>
+          <rect x="200" y="100" width="140" height="70" rx="12" fill="var(--green)" opacity="0.4"/>
+          <polygon points="260,170 270,190 280,170" fill="var(--green)" opacity="0.4"/>
+          <g fill="var(--green)" opacity="0.3">
+            <rect x="80" y="60" width="50" height="5" rx="2.5"/><rect x="80" y="72" width="90" height="5" rx="2.5"/><rect x="80" y="84" width="70" height="5" rx="2.5"/>
+            <rect x="220" y="120" width="50" height="5" rx="2.5"/><rect x="220" y="132" width="90" height="5" rx="2.5"/><rect x="220" y="144" width="70" height="5" rx="2.5"/>
+          </g>
+        </svg>
+      </div>
+      <div class="project-info">
+        <div class="project-tag">Interactive</div>
+        <h3>Q&amp;A &amp; Discussion</h3>
+        <p>Your experience, questions and insights are essential to shaping how we position the CREE System in an evolving regulatory and market environment.</p>
+        <a href="#contact" class="project-link">Join the Conversation →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ FOOTER ════════════ -->
+<footer id="contact">
+  <div class="footer-brand">
+    <div class="logo">Change<span>Makers</span></div>
+    <p>By CREE Building GmbH — Technical Edition. Shaping sustainable construction through innovation and network collaboration.</p>
+  </div>
+  <div>
+    <h4>Event</h4>
+    <ul>
+      <li><a href="#about">Overview</a></li>
+      <li><a href="#features">Agenda</a></li>
+      <li><a href="#speakers">Speaker</a></li>
+      <li><a href="#">Register</a></li>
+    </ul>
+  </div>
+  <div>
+    <h4>Connect</h4>
+    <ul>
+      <li><a href="#">CREE Website</a></li>
+      <li><a href="#">LinkedIn</a></li>
+      <li><a href="#">Newsletter</a></li>
+      <li><a href="#">Contact Us</a></li>
+    </ul>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2025 Change Makers Technical Edition — CREE Building GmbH</span>
+    <span>From compliance to competitive advantage</span>
+  </div>
+</footer>
+
+</body>
+</html>
