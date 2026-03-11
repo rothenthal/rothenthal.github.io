@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -184,16 +185,17 @@
 
   /* Hero right — SVG mosaic */
   .hero-right {
-    background: var(--black);
+    background: var(--white);
     position: relative;
     overflow: hidden;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     align-content: center;
+    border-left: 3px solid var(--black);
   }
   .hero-right .mosaic-cell {
     aspect-ratio: 1;
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid rgba(0,0,0,0.06);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -231,7 +233,7 @@
     transition: background 0.3s ease;
   }
   .mosaic-cell:hover {
-    background: rgba(0, 210, 106, 0.08);
+    background: rgba(0, 210, 106, 0.06);
   }
 
   .hero-right .overlay-text {
@@ -242,9 +244,9 @@
     font-size: 1.1rem;
     letter-spacing: 3px;
     text-transform: uppercase;
-    color: var(--white);
+    color: var(--black);
     writing-mode: vertical-lr;
-    opacity: 0.25;
+    opacity: 0.06;
   }
 
   .quotemark {
@@ -758,126 +760,135 @@
   <div class="hero-right">
     <!-- Row 1 -->
     <div class="mosaic-cell">
-      <!-- Half circle top-right -->
-      <svg viewBox="0 0 100 100" preserveAspectRatio="none"><circle cx="100" cy="0" r="80" fill="var(--green)"/></svg>
+      <!-- Solid green circle -->
+      <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="var(--green)"/></svg>
     </div>
     <div class="mosaic-cell">
-      <!-- Dot grid -->
+      <!-- Black & white triangle grid (2x2) -->
       <svg viewBox="0 0 100 100">
-        <g fill="var(--green)" opacity="0.6">
-          <circle cx="15" cy="15" r="4"/><circle cx="38" cy="15" r="4"/><circle cx="61" cy="15" r="4"/><circle cx="84" cy="15" r="4"/>
-          <circle cx="15" cy="38" r="4"/><circle cx="38" cy="38" r="4"/><circle cx="61" cy="38" r="4"/><circle cx="84" cy="38" r="4"/>
-          <circle cx="15" cy="61" r="4"/><circle cx="38" cy="61" r="4"/><circle cx="61" cy="61" r="4"/><circle cx="84" cy="61" r="4"/>
-          <circle cx="15" cy="84" r="4"/><circle cx="38" cy="84" r="4"/><circle cx="61" cy="84" r="4"/><circle cx="84" cy="84" r="4"/>
-        </g>
+        <rect width="100" height="100" fill="#fff"/>
+        <polygon points="0,0 50,0 0,50" fill="var(--black)"/>
+        <polygon points="50,0 100,0 50,50" fill="var(--black)"/>
+        <polygon points="50,50 100,50 50,100" fill="var(--black)"/>
+        <polygon points="0,50 50,50 0,100" fill="var(--black)"/>
       </svg>
     </div>
     <div class="mosaic-cell">
-      <!-- Triangles -->
+      <!-- Quotemark / double-C — green half circle with black bite -->
       <svg viewBox="0 0 100 100">
-        <polygon points="0,100 50,0 100,100" fill="var(--green)"/>
+        <rect width="100" height="100" fill="var(--black)"/>
+        <circle cx="55" cy="50" r="45" fill="var(--green)"/>
+        <circle cx="40" cy="50" r="22" fill="var(--black)"/>
       </svg>
     </div>
     <div class="mosaic-cell">
-      <!-- Diagonal stripes -->
+      <!-- Green half-circle bottom -->
       <svg viewBox="0 0 100 100">
-        <defs><pattern id="diag1" width="14" height="14" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><rect width="7" height="14" fill="var(--green)" opacity="0.5"/></pattern></defs>
-        <rect width="100" height="100" fill="url(#diag1)"/>
+        <path d="M0 50 A50 50 0 0 1 100 50 L100 100 L0 100Z" fill="var(--green)"/>
       </svg>
     </div>
 
     <!-- Row 2 -->
     <div class="mosaic-cell">
-      <!-- Horizontal lines -->
+      <!-- Black triangle grid — small triangles pointing down -->
       <svg viewBox="0 0 100 100">
-        <g stroke="var(--green)" stroke-width="5" opacity="0.5">
-          <line x1="0" y1="12" x2="100" y2="12"/><line x1="0" y1="30" x2="100" y2="30"/>
-          <line x1="0" y1="48" x2="100" y2="48"/><line x1="0" y1="66" x2="100" y2="66"/>
-          <line x1="0" y1="84" x2="100" y2="84"/>
+        <rect width="100" height="100" fill="#fff"/>
+        <g fill="var(--black)">
+          <polygon points="0,0 25,0 12.5,25"/>
+          <polygon points="25,0 50,0 37.5,25"/>
+          <polygon points="50,0 75,0 62.5,25"/>
+          <polygon points="75,0 100,0 87.5,25"/>
+          <polygon points="12.5,25 37.5,25 25,50"/>
+          <polygon points="37.5,25 62.5,25 50,50"/>
+          <polygon points="62.5,25 87.5,25 75,50"/>
+          <polygon points="0,50 25,50 12.5,75"/>
+          <polygon points="25,50 50,50 37.5,75"/>
+          <polygon points="50,50 75,50 62.5,75"/>
+          <polygon points="75,50 100,50 87.5,75"/>
+          <polygon points="12.5,75 37.5,75 25,100"/>
+          <polygon points="37.5,75 62.5,75 50,100"/>
+          <polygon points="62.5,75 87.5,75 75,100"/>
         </g>
       </svg>
     </div>
     <div class="mosaic-cell">
-      <!-- Large quotemark -->
+      <!-- Fine diagonal hatching — black lines on white -->
       <svg viewBox="0 0 100 100">
-        <path d="M10 80V50C10 30 22 18 42 14l3 8C32 26 27 34 26 44h16v36H10Zm38 0V50C48 30 60 18 80 14l3 8C70 26 65 34 64 44h16v36H48Z" fill="var(--green)"/>
+        <defs><pattern id="hatch1" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="0" y2="6" stroke="var(--black)" stroke-width="1.5"/></pattern></defs>
+        <rect width="100" height="100" fill="#fff"/>
+        <rect width="100" height="100" fill="url(#hatch1)"/>
       </svg>
     </div>
     <div class="mosaic-cell">
-      <!-- Half circle bottom -->
-      <svg viewBox="0 0 100 100" preserveAspectRatio="none"><circle cx="50" cy="100" r="50" fill="var(--green)" opacity="0.7"/></svg>
+      <!-- Green half-circle from right -->
+      <svg viewBox="0 0 100 100">
+        <path d="M100 0 A50 50 0 0 1 100 100Z" fill="var(--green)"/>
+      </svg>
     </div>
     <div class="mosaic-cell">
-      <!-- Checkerboard -->
+      <!-- Wavy lines — green waves on dark bg -->
       <svg viewBox="0 0 100 100">
-        <g fill="var(--green)" opacity="0.4">
-          <rect x="0" y="0" width="25" height="25"/><rect x="50" y="0" width="25" height="25"/>
-          <rect x="25" y="25" width="25" height="25"/><rect x="75" y="25" width="25" height="25"/>
-          <rect x="0" y="50" width="25" height="25"/><rect x="50" y="50" width="25" height="25"/>
-          <rect x="25" y="75" width="25" height="25"/><rect x="75" y="75" width="25" height="25"/>
-        </g>
+        <rect width="100" height="100" fill="var(--black)"/>
+        <defs><pattern id="wave1" width="40" height="12" patternUnits="userSpaceOnUse"><path d="M0 6 Q10 0 20 6 Q30 12 40 6" fill="none" stroke="var(--green)" stroke-width="2.5"/></pattern></defs>
+        <rect width="100" height="100" fill="url(#wave1)"/>
       </svg>
     </div>
 
     <!-- Row 3 -->
     <div class="mosaic-cell">
-      <!-- Quarter circle -->
-      <svg viewBox="0 0 100 100"><path d="M0 0 A100 100 0 0 1 100 100 L0 100Z" fill="var(--green)" opacity="0.6"/></svg>
-    </div>
-    <div class="mosaic-cell">
-      <!-- Cross -->
+      <!-- Diagonal stripes — green on green (thick) -->
       <svg viewBox="0 0 100 100">
-        <rect x="38" y="10" width="24" height="80" fill="var(--green)"/>
-        <rect x="10" y="38" width="80" height="24" fill="var(--green)"/>
+        <defs><pattern id="diagG" width="14" height="14" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><rect width="7" height="14" fill="var(--green)"/></pattern></defs>
+        <rect width="100" height="100" fill="#fff"/>
+        <rect width="100" height="100" fill="url(#diagG)"/>
       </svg>
     </div>
     <div class="mosaic-cell">
-      <!-- Concentric circles -->
+      <!-- Large green circle, bottom-right aligned -->
+      <svg viewBox="0 0 100 100"><circle cx="85" cy="85" r="55" fill="var(--green)"/></svg>
+    </div>
+    <div class="mosaic-cell">
+      <!-- Quotemark — open quote shapes -->
       <svg viewBox="0 0 100 100">
-        <circle cx="50" cy="50" r="45" fill="none" stroke="var(--green)" stroke-width="4"/>
-        <circle cx="50" cy="50" r="32" fill="none" stroke="var(--green)" stroke-width="4" opacity="0.7"/>
-        <circle cx="50" cy="50" r="19" fill="none" stroke="var(--green)" stroke-width="4" opacity="0.4"/>
-        <circle cx="50" cy="50" r="6" fill="var(--green)"/>
+        <path d="M5 65V40C5 22 15 12 32 8l3 7C24 19 19 26 18 35h14v30H5Z" fill="var(--green)"/>
+        <path d="M52 65V40C52 22 62 12 79 8l3 7C71 19 66 26 65 35h14v30H52Z" fill="var(--green)"/>
       </svg>
     </div>
     <div class="mosaic-cell">
-      <!-- Diamond -->
-      <svg viewBox="0 0 100 100"><polygon points="50,5 95,50 50,95 5,50" fill="var(--green)" opacity="0.5"/></svg>
+      <!-- Black & white checkerboard triangle mix -->
+      <svg viewBox="0 0 100 100">
+        <rect width="100" height="100" fill="#fff"/>
+        <polygon points="0,0 50,50 0,100" fill="var(--black)"/>
+        <polygon points="100,0 50,50 100,100" fill="var(--black)"/>
+      </svg>
     </div>
 
     <!-- Row 4 -->
     <div class="mosaic-cell">
-      <!-- Small triangles pattern -->
+      <!-- Green quarter circle top-left -->
+      <svg viewBox="0 0 100 100"><path d="M0 0 L100 0 A100 100 0 0 0 0 100Z" fill="var(--green)"/></svg>
+    </div>
+    <div class="mosaic-cell">
+      <!-- Fine diagonal hatching — opposite direction -->
       <svg viewBox="0 0 100 100">
-        <g fill="var(--green)">
-          <polygon points="0,33 16.5,0 33,33"/><polygon points="33,33 49.5,0 66,33"/>
-          <polygon points="66,33 82.5,0 100,33" opacity="0.6"/>
-          <polygon points="16.5,66 33,33 49.5,66" opacity="0.6"/><polygon points="49.5,66 66,33 82.5,66"/>
-          <polygon points="0,100 16.5,66 33,100"/><polygon points="33,100 49.5,66 66,100" opacity="0.6"/>
-          <polygon points="66,100 82.5,66 100,100"/>
-        </g>
+        <defs><pattern id="hatch2" width="6" height="6" patternTransform="rotate(-45)" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="0" y2="6" stroke="var(--black)" stroke-width="1.5"/></pattern></defs>
+        <rect width="100" height="100" fill="#fff"/>
+        <rect width="100" height="100" fill="url(#hatch2)"/>
       </svg>
     </div>
     <div class="mosaic-cell">
-      <!-- Circle half -->
+      <!-- Green pac-man / C-shape -->
       <svg viewBox="0 0 100 100">
-        <path d="M50 0 A50 50 0 0 1 50 100Z" fill="var(--green)"/>
+        <circle cx="50" cy="50" r="45" fill="var(--green)"/>
+        <circle cx="30" cy="50" r="22" fill="#fff"/>
       </svg>
     </div>
     <div class="mosaic-cell">
-      <!-- Pac-man style -->
+      <!-- Wavy lines — green waves on white -->
       <svg viewBox="0 0 100 100">
-        <path d="M50 50 L90 20 A50 50 0 1 1 90 80Z" fill="var(--green)" opacity="0.8"/>
-      </svg>
-    </div>
-    <div class="mosaic-cell">
-      <!-- Vertical stripes -->
-      <svg viewBox="0 0 100 100">
-        <g fill="var(--green)">
-          <rect x="5" y="0" width="10" height="100"/><rect x="25" y="0" width="10" height="100" opacity="0.7"/>
-          <rect x="45" y="0" width="10" height="100"/><rect x="65" y="0" width="10" height="100" opacity="0.7"/>
-          <rect x="85" y="0" width="10" height="100"/>
-        </g>
+        <rect width="100" height="100" fill="#fff"/>
+        <defs><pattern id="wave2" width="40" height="10" patternUnits="userSpaceOnUse"><path d="M0 5 Q10 0 20 5 Q30 10 40 5" fill="none" stroke="var(--green)" stroke-width="2"/></pattern></defs>
+        <rect width="100" height="100" fill="url(#wave2)"/>
       </svg>
     </div>
 
