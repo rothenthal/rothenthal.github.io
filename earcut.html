@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Earcut Tester</title>
+<script src="https://cdn.jsdelivr.net/npm/earcut/dist/earcut.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0c0e14;
+    --surface: #13161f;
+    --surface2: #1a1e2a;
+    --border: #252a3a;
+    --border-focus: #4a6fa5;
+    --text: #c8cdd8;
+    --text-dim: #6b7394;
+    --text-bright: #e8ecf4;
+    --accent: #5b8def;
+    --accent-glow: #5b8def40;
+    --tri-stroke: #3a5f9e;
+    --tri-fill: #1a3560;
+    --outer-stroke: #e8ecf4;
+    --hole-stroke: #e07a5f;
+    --vertex: #5b8def;
+    --vertex-glow: #5b8def80;
+    --error: #e07a5f;
+    --success: #6ec89b;
+    --warn: #e0c35f;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    overflow-x: hidden;
+  }
+
+  .noise {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+
+  .shell {
+    position: relative;
+    z-index: 1;
+    padding: 24px 32px 24px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  header h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--text-bright);
+    letter-spacing: -0.5px;
+  }
+
+  header h1 span {
+    color: var(--accent);
+  }
+
+  header .tag {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    background: var(--surface2);
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: var(--left-w, 360px) 8px 1fr;
+    align-items: stretch;
+    flex: 1;
+    min-height: 0;
+    gap: 0 8px;
+  }
+
+  @media (max-width: 960px) {
+    .layout { grid-template-columns: 1fr !important; }
+    .resize-handle { display: none; }
+  }
+
+  .resize-handle {
+    width: 24px;
+    margin: 0 -12px;
+    cursor: col-resize;
+    position: relative;
+    z-index: 3;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .resize-handle::after {
+    content: '';
+    width: 3px;
+    height: 40px;
+    border-radius: 2px;
+    background: var(--border);
+    transition: background 0.15s, height 0.15s;
+  }
+
+  .resize-handle:hover::after,
+  .resize-handle.dragging::after {
+    background: var(--accent);
+    height: 60px;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .panel-head h2 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .panel-body { padding: 16px; }
+
+  /* --- Input Panel --- */
+
+  .presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .preset-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 400;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .preset-btn:hover {
+    border-color: var(--border-focus);
+    color: var(--text);
+    background: var(--surface2);
+  }
+
+  .preset-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-glow);
+  }
+
+  textarea {
+    width: 100%;
+    height: 200px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--text-bright);
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+    tab-size: 2;
+  }
+
+  textarea:focus { border-color: var(--border-focus); }
+
+  textarea.has-error { border-color: var(--error); }
+
+  /* --- JSON Editor (highlight behind textarea) --- */
+  .json-editor {
+    position: relative;
+    width: 100%;
+  }
+
+  .json-editor textarea {
+    position: relative;
+    z-index: 2;
+    color: transparent;
+    caret-color: var(--text-bright);
+    background: transparent;
+    resize: vertical;
+  }
+
+  .json-editor textarea::selection {
+    background: rgba(91, 141, 239, 0.25);
+  }
+
+  .json-highlight {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    padding: 12px;
+    margin: 0;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: var(--bg);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow: hidden;
+    pointer-events: none;
+    tab-size: 2;
+    color: var(--text-dim);
+  }
+
+  .jt-bracket { color: #8ca8d8; }
+  .jt-number { color: #6ec89b; }
+  .jt-string { color: #e0c35f; }
+  .jt-colon { color: #6b7394; }
+  .jt-comma { color: #6b7394; }
+  .jt-key { color: #5b8def; }
+  .jt-bool { color: #c792ea; }
+  .jt-null { color: #c792ea; }
+  .jt-error { color: var(--error); text-decoration: wavy underline; text-decoration-color: var(--error); text-underline-offset: 3px; }
+  .jt-error-region { background: rgba(224, 122, 95, 0.18); color: var(--error); border-radius: 2px; }
+  .jt-error-caret {
+    display: inline-block;
+    width: 0;
+    border-left: 1.5px solid var(--error);
+    margin-left: -0.5px;
+    margin-right: -1px;
+    animation: blink-error 0.8s step-end infinite;
+    vertical-align: text-bottom;
+    height: 1.2em;
+  }
+  @keyframes blink-error { 50% { opacity: 0; } }
+
+  .json-error-hint {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--error);
+    margin-top: 4px;
+    min-height: 14px;
+    opacity: 0.9;
+  }
+
+  .input-footer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .run-btn {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.3px;
+    padding: 9px 22px;
+    border: none;
+    border-radius: 6px;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 0 2px 12px var(--accent-glow);
+  }
+
+  .run-btn:hover { filter: brightness(1.15); }
+  .run-btn:active { transform: scale(0.97); }
+
+  .fmt-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.3px;
+    padding: 7px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .fmt-btn:hover {
+    border-color: var(--border-focus);
+    color: var(--text);
+    background: var(--surface2);
+  }
+
+  .fmt-btn:active { transform: scale(0.97); }
+
+  .status-msg {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    flex: 1;
+    text-align: right;
+    word-break: break-word;
+  }
+
+  .status-msg.error { color: var(--error); }
+  .status-msg.ok { color: var(--success); }
+
+  /* --- Format Help --- */
+  .format-hint {
+    margin-top: 14px;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .format-hint strong { color: var(--text); font-weight: 500; }
+
+  /* --- Viz Panel --- */
+  .viz-panel {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+    min-height: 0;
+  }
+
+  .viz-panel .panel-body { flex: 1; display: flex; flex-direction: column; padding: 0; }
+
+  .viz-wrap {
+    position: relative;
+    background: var(--bg);
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .viz-wrap svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+    cursor: grab;
+    user-select: none;
+  }
+
+  .viz-wrap svg.panning {
+    cursor: grabbing;
+  }
+
+  .viz-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    inset: 0;
+    color: var(--text-dim);
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* --- Output Panel --- */
+  .results-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .stat-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+
+  .stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-bright);
+  }
+
+  .stat-value.good { color: var(--success); }
+  .stat-value.warn { color: var(--warn); }
+  .stat-value.bad { color: var(--error); }
+
+  .output-block {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 10px;
+  }
+
+  .output-block h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  .output-block pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 140px;
+    overflow-y: auto;
+  }
+
+  .output-block pre::-webkit-scrollbar { width: 5px; }
+  .output-block pre::-webkit-scrollbar-track { background: transparent; }
+  .output-block pre::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* --- Legend --- */
+  .legend {
+    display: flex;
+    gap: 16px;
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.3px;
+  }
+
+  .legend-swatch {
+    width: 14px;
+    height: 3px;
+    border-radius: 1px;
+  }
+
+  .legend-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+
+  /* --- Checkbox toggle --- */
+  .toggle-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .toggle-label input[type="checkbox"] {
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: var(--bg);
+    cursor: pointer;
+    position: relative;
+  }
+
+  .toggle-label input[type="checkbox"]:checked {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .toggle-label input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 3.5px;
+    top: 1px;
+    width: 4px;
+    height: 7px;
+    border: solid #fff;
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg);
+  }
+
+  /* tooltip on hover over vertex */
+  .vtx-tooltip {
+    position: absolute;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 3px 7px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-bright);
+    pointer-events: none;
+    z-index: 10;
+    white-space: nowrap;
+    display: none;
+  }
+
+  .viz-controls {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    gap: 4px;
+    z-index: 5;
+  }
+
+  .viz-ctrl-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: var(--surface);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.12s;
+    padding: 0;
+  }
+
+  .viz-ctrl-btn:hover {
+    border-color: var(--border-focus);
+    color: var(--text);
+    background: var(--surface2);
+  }
+
+  .viz-ctrl-btn.wide {
+    width: auto;
+    padding: 0 10px;
+    font-size: 10px;
+    letter-spacing: 0.3px;
+  }
+
+  /* --- Mode tabs --- */
+  .mode-tabs {
+    display: flex;
+    gap: 2px;
+    background: var(--bg);
+    border-radius: 5px;
+    padding: 2px;
+  }
+
+  .mode-tab {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.3px;
+    padding: 4px 10px;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+
+  .mode-tab:hover { color: var(--text); }
+
+  .mode-tab.active {
+    background: var(--surface2);
+    color: var(--accent);
+  }
+
+  .field-label {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+
+  .viz-zoom-label {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+</style>
+</head>
+<body>
+<div class="noise"></div>
+<div class="shell">
+  <!-- <header>
+    <h1>earcut<span>.</span>tester</h1>
+    <span class="tag">mapbox/earcut test fixture format</span>
+  </header> -->
+
+  <div class="layout">
+    <!-- Left: Input -->
+    <div style="display:flex;flex-direction:column;gap:16px;overflow-y:auto;min-height:0;">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Input</h2>
+          <div class="mode-tabs">
+            <button class="mode-tab active" id="tab-rings" onclick="setMode('rings')">Rings (JSON)</button>
+            <button class="mode-tab" id="tab-flat" onclick="setMode('flat')">Flat Vertices</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="presets" id="presets"></div>
+
+          <!-- Rings mode -->
+          <div id="mode-rings">
+            <div class="json-editor">
+              <pre class="json-highlight" id="hl-input"></pre>
+              <textarea id="input" spellcheck="false"></textarea>
+            </div>
+            <div class="json-error-hint" id="err-input"></div>
+            <div class="format-hint">
+              <strong>Format:</strong> Array of rings (GeoJSON-style).<br>
+              Ring 0 = outer boundary, Ring 1+ = holes.<br>
+              Each ring: <code>[[x,y], [x,y], ...]</code><br>
+              Same format as <code>test/fixtures/*.json</code> in the repo.
+            </div>
+          </div>
+
+          <!-- Flat mode -->
+          <div id="mode-flat" style="display:none;">
+            <label class="field-label">Flat Vertices</label>
+            <div class="json-editor">
+              <pre class="json-highlight" id="hl-input-flat"></pre>
+              <textarea id="input-flat" spellcheck="false" placeholder="[-10.8, -10, 100, 0, 100, 100, 0, 100, 20, 20, 80, 20, 80, 80, 20, 80]"></textarea>
+            </div>
+            <div class="json-error-hint" id="err-input-flat"></div>
+            <label class="field-label" style="margin-top:10px;">Hole Indices <span style="color:var(--text-dim);font-weight:300;">(optional)</span></label>
+            <div class="json-editor">
+              <pre class="json-highlight" id="hl-input-holes"></pre>
+              <textarea id="input-holes" spellcheck="false" style="height:48px;" placeholder="[4]"></textarea>
+            </div>
+            <div class="json-error-hint" id="err-input-holes"></div>
+            <div class="format-hint">
+              <strong>Format:</strong> Flat array of coordinates: <code>[x0,y0, x1,y1, ...]</code><br>
+              Holes: vertex indices where each hole starts: <code>[5, 8]</code><br>
+              Same as <code>earcut(vertices, holes, 2)</code> call signature.
+            </div>
+          </div>
+
+          <div class="input-footer">
+            <button class="run-btn" onclick="run()">Triangulate</button>
+            <button class="fmt-btn" onclick="formatJSON()" title="Pretty-print JSON (Ctrl+Shift+F)">Format</button>
+            <button class="fmt-btn compact" onclick="formatJSON(true)" title="Minify JSON">Compact</button>
+            <span class="status-msg" id="status"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Output stats -->
+      <div class="panel" id="output-panel" style="display:none;">
+        <div class="panel-head"><h2>Output</h2></div>
+        <div class="panel-body">
+          <div class="results-grid">
+            <div class="stat-card">
+              <div class="stat-label">Triangles</div>
+              <div class="stat-value" id="stat-tris">—</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Vertices</div>
+              <div class="stat-value" id="stat-verts">—</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Deviation</div>
+              <div class="stat-value" id="stat-dev">—</div>
+            </div>
+          </div>
+          <div class="output-block">
+            <h3>Triangle Indices</h3>
+            <pre id="out-indices"></pre>
+          </div>
+          <div class="output-block">
+            <h3>Flat Vertices</h3>
+            <pre id="out-verts"></pre>
+          </div>
+          <div class="output-block">
+            <h3>Hole Indices</h3>
+            <pre id="out-holes"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="resize-handle" id="resize-handle"></div>
+
+    <!-- Right: Visualization -->
+    <div class="panel viz-panel">
+      <div class="panel-head">
+        <h2>Visualization</h2>
+        <div class="toggle-row" style="margin:0;">
+          <label class="toggle-label"><input type="checkbox" id="chk-tris" checked onchange="renderSVG()">Triangles</label>
+          <label class="toggle-label"><input type="checkbox" id="chk-edges" checked onchange="renderSVG()">Edges</label>
+          <label class="toggle-label"><input type="checkbox" id="chk-verts" checked onchange="renderSVG()">Vertices</label>
+          <label class="toggle-label"><input type="checkbox" id="chk-idx" onchange="renderSVG()">Indices</label>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="viz-wrap" id="viz-wrap">
+          <div class="viz-empty" id="viz-empty">Enter polygon data and press Triangulate</div>
+          <div class="viz-controls" id="viz-controls" style="display:none;">
+            <button class="viz-ctrl-btn" onclick="zoomIn()" title="Zoom in">+</button>
+            <button class="viz-ctrl-btn" onclick="zoomOut()" title="Zoom out">−</button>
+            <button class="viz-ctrl-btn wide" onclick="resetView()" title="Reset view">reset</button>
+          </div>
+          <span class="viz-zoom-label" id="viz-zoom-label"></span>
+        </div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-swatch" style="background:#e8ecf4;"></div>Outer ring</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:#e07a5f;"></div>Hole ring</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:#3a5f9e;opacity:0.6"></div>Triangle edge</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#5b8def;"></div>Vertex</div>
+      </div>
+      <div class="vtx-tooltip" id="tooltip"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// --- Earcut is loaded as earcut.default from the UMD bundle ---
+const earcutFn = earcut.default || earcut;
+
+// JSON.parse that tolerates trailing commas: ,] and ,}
+function jsonParse(str) {
+  return JSON.parse(str.replace(/,\s*([\]}])/g, '$1'));
+}
+
+// --- JSON Syntax Highlighting ---
+function escapeHTML(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function highlightJSON(str, errorPos) {
+  // Tokenize and wrap spans — handles nested arrays/objects, numbers, strings, booleans, null
+  // If errorPos >= 0, insert an error caret at that position and dim everything after it
+  let html = '';
+  let i = 0;
+  const len = str.length;
+  const hasErr = typeof errorPos === 'number' && errorPos >= 0;
+  let errorInserted = false;
+  let inErrorRegion = false;
+
+  function maybeInsertError(before, after) {
+    // Call between tokens: if errorPos falls in range [before, after), insert marker
+    if (hasErr && !errorInserted && errorPos <= after) {
+      errorInserted = true;
+      inErrorRegion = true;
+      html += '<span class="jt-error-caret"></span><span class="jt-error-region">';
+    }
+  }
+
+  while (i < len) {
+    maybeInsertError(i, i);
+    const ch = str[i];
+
+    // Whitespace — pass through
+    if (/\s/.test(ch)) {
+      let ws = '';
+      while (i < len && /\s/.test(str[i])) ws += str[i++];
+      html += escapeHTML(ws);
+      continue;
+    }
+
+    // Brackets
+    if (ch === '[' || ch === ']' || ch === '{' || ch === '}') {
+      html += `<span class="jt-bracket">${ch}</span>`;
+      i++;
+      continue;
+    }
+
+    // Comma
+    if (ch === ',') {
+      html += `<span class="jt-comma">,</span>`;
+      i++;
+      continue;
+    }
+
+    // Colon
+    if (ch === ':') {
+      html += `<span class="jt-colon">:</span>`;
+      i++;
+      continue;
+    }
+
+    // String
+    if (ch === '"') {
+      let s = '"';
+      i++;
+      while (i < len && str[i] !== '"') {
+        if (str[i] === '\\' && i + 1 < len) { s += str[i] + str[i+1]; i += 2; }
+        else { s += str[i]; i++; }
+      }
+      if (i < len) { s += '"'; i++; }
+      html += `<span class="jt-string">${escapeHTML(s)}</span>`;
+      continue;
+    }
+
+    // Number (including negative, decimal, exponent)
+    if (ch === '-' || (ch >= '0' && ch <= '9')) {
+      let num = '';
+      if (ch === '-') { num += '-'; i++; }
+      while (i < len && ((str[i] >= '0' && str[i] <= '9') || str[i] === '.' || str[i] === 'e' || str[i] === 'E' || str[i] === '+' || str[i] === '-')) {
+        if ((str[i] === '+' || str[i] === '-') && num.length > 0 && num[num.length-1] !== 'e' && num[num.length-1] !== 'E') break;
+        num += str[i]; i++;
+      }
+      html += `<span class="jt-number">${escapeHTML(num)}</span>`;
+      continue;
+    }
+
+    // Booleans & null
+    if (str.slice(i, i+4) === 'true')  { html += `<span class="jt-bool">true</span>`; i += 4; continue; }
+    if (str.slice(i, i+5) === 'false') { html += `<span class="jt-bool">false</span>`; i += 5; continue; }
+    if (str.slice(i, i+4) === 'null')  { html += `<span class="jt-null">null</span>`; i += 4; continue; }
+
+    // Anything else — error token
+    html += `<span class="jt-error">${escapeHTML(ch)}</span>`;
+    i++;
+  }
+
+  // If error position is at the very end (past all content)
+  if (hasErr && !errorInserted) {
+    html += '<span class="jt-error-caret"></span>';
+  }
+
+  // Close error region if opened
+  if (inErrorRegion) {
+    html += '</span>';
+  }
+
+  return html;
+}
+
+function validateJSONLive(str) {
+  if (!str.trim()) return null; // empty is fine
+  try {
+    jsonParse(str);
+    return null;
+  } catch (e) {
+    const posMatch = e.message.match(/position\s+(\d+)/i);
+    let msg = e.message;
+    let pos = -1;
+    if (posMatch) {
+      // Position is reported against the cleaned string (trailing commas removed),
+      // but we want the position in the original. For small edits this is close enough;
+      // for trailing commas we adjust by scanning.
+      pos = parseInt(posMatch[1]);
+      const cleaned = str.replace(/,\s*([\]}])/g, '$1');
+      // Map pos in cleaned back to original by counting removed chars
+      let ci = 0, oi = 0;
+      const re = /,(\s*)([\]}])/g;
+      let match;
+      const removals = [];
+      let tmpStr = str;
+      let offset = 0;
+      re.lastIndex = 0;
+      while ((match = re.exec(str)) !== null) {
+        // The comma at match.index is removed, shifting by 1
+        removals.push(match.index);
+      }
+      // Walk through: for each removal before pos in cleaned string, add 1 to get original pos
+      let adjustedPos = pos;
+      for (const remIdx of removals) {
+        if (remIdx <= adjustedPos) adjustedPos++;
+        else break;
+      }
+      pos = Math.min(adjustedPos, str.length);
+
+      const beforeError = str.slice(0, pos);
+      const line = (beforeError.match(/\n/g) || []).length + 1;
+      const col = pos - beforeError.lastIndexOf('\n');
+      msg = `Line ${line}, Col ${col}: ${e.message.replace(/\s*at position \d+.*/i, '')}`;
+    }
+    return { msg, pos };
+  }
+}
+
+// Set up editor for a textarea + highlight pair
+function setupJsonEditor(textareaId, highlightId, errorId) {
+  const ta = document.getElementById(textareaId);
+  const hl = document.getElementById(highlightId);
+  const errEl = errorId ? document.getElementById(errorId) : null;
+  if (!ta || !hl) return;
+
+  function update() {
+    let errorPos = -1;
+    if (errEl) {
+      const result = validateJSONLive(ta.value);
+      if (result) {
+        errEl.textContent = result.msg;
+        errorPos = result.pos;
+        ta.classList.add('has-error');
+      } else {
+        errEl.textContent = '';
+        ta.classList.remove('has-error');
+      }
+    }
+    hl.innerHTML = highlightJSON(ta.value, errorPos);
+    hl.scrollTop = ta.scrollTop;
+    hl.scrollLeft = ta.scrollLeft;
+  }
+
+  ta.addEventListener('input', update);
+  ta.addEventListener('scroll', () => {
+    hl.scrollTop = ta.scrollTop;
+    hl.scrollLeft = ta.scrollLeft;
+  });
+
+  // Handle resize — sync highlight size
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(() => {
+      hl.style.height = ta.offsetHeight + 'px';
+    }).observe(ta);
+  }
+
+  // Initial render
+  update();
+
+  // Return update fn so we can trigger after programmatic value changes
+  return update;
+}
+
+// --- Presets matching repo test/fixtures format ---
+const PRESETS = {
+  "simple quad": [
+    [[0,0],[100,0],[100,100],[0,100]]
+  ],
+  "with hole": [
+    [[0,0],[100,0],[100,100],[0,100]],
+    [[20,20],[80,20],[80,80],[20,80]]
+  ],
+  "L-shape": [
+    [[0,0],[60,0],[60,40],[40,40],[40,100],[0,100]]
+  ],
+  "two holes": [
+    [[0,0],[200,0],[200,100],[0,100]],
+    [[20,20],[60,20],[60,80],[20,80]],
+    [[120,20],[180,20],[180,80],[120,80]]
+  ],
+  "concave star": [
+    [[50,0],[63,35],[100,35],[70,57],[80,95],[50,72],[20,95],[30,57],[0,35],[37,35]]
+  ],
+  "degenerate": [
+    [[0,0],[50,0],[100,0],[100,50],[100,100],[50,100],[0,100],[0,50]]
+  ],
+  "self-touching": [
+    [[0,0],[100,0],[100,100],[50,50],[0,100]]
+  ]
+};
+
+// --- State ---
+let lastData = null;
+let lastTriangles = null;
+let lastRings = null;
+let inputMode = 'rings'; // 'rings' or 'flat'
+
+// Viewbox state (must be declared before loadPreset triggers redraw)
+let baseVB = null;  // { x, y, w, h } computed from data
+let curVB = null;   // { x, y, w, h } current (zoomed/panned)
+let isPanning = false;
+let panStart = { x: 0, y: 0 };
+let panVBStart = null;
+
+function setMode(mode) {
+  const prevMode = inputMode;
+  inputMode = mode;
+  document.getElementById('tab-rings').classList.toggle('active', mode === 'rings');
+  document.getElementById('tab-flat').classList.toggle('active', mode === 'flat');
+  document.getElementById('mode-rings').style.display = mode === 'rings' ? '' : 'none';
+  document.getElementById('mode-flat').style.display = mode === 'flat' ? '' : 'none';
+
+  // Sync data across modes on switch
+  if (prevMode !== mode) {
+    if (mode === 'flat') {
+      // Try to convert rings → flat
+      try {
+        const rings = jsonParse(document.getElementById('input').value);
+        const flattenFn = earcutFn.flatten || earcut.flatten;
+        const data = flattenFn(rings);
+        document.getElementById('input-flat').value = JSON.stringify(Array.from(data.vertices));
+        document.getElementById('input-holes').value = data.holes.length ? JSON.stringify(data.holes) : '';
+      } catch (_) { /* leave flat fields as-is */ }
+    } else {
+      // Try to convert flat → rings
+      try {
+        const verts = jsonParse(document.getElementById('input-flat').value);
+        const holesStr = document.getElementById('input-holes').value.trim();
+        const holes = holesStr && holesStr !== '[]' ? jsonParse(holesStr) : [];
+        const rings = flatToRings(verts, holes, 2);
+        document.getElementById('input').value = JSON.stringify(rings, null, 2);
+      } catch (_) { /* leave rings field as-is */ }
+    }
+    if (typeof refreshAllEditors === 'function') refreshAllEditors();
+  }
+}
+
+// Convert flat vertices + hole indices back to rings for visualization
+function flatToRings(vertices, holes, dimensions) {
+  const dim = dimensions || 2;
+  const totalPts = vertices.length / dim;
+  const holeStarts = holes && holes.length ? holes.slice() : [];
+  // Build list of ring start indices (in vertex count, not coord count)
+  const ringStarts = [0, ...holeStarts];
+  const ringEnds = [...holeStarts, totalPts];
+  const rings = [];
+  for (let r = 0; r < ringStarts.length; r++) {
+    const ring = [];
+    for (let i = ringStarts[r]; i < ringEnds[r]; i++) {
+      ring.push([vertices[i * dim], vertices[i * dim + 1]]);
+    }
+    rings.push(ring);
+  }
+  return rings;
+}
+
+// --- Init ---
+const presetsEl = document.getElementById('presets');
+Object.keys(PRESETS).forEach((name, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'preset-btn';
+  btn.textContent = name;
+  btn.onclick = () => loadPreset(name);
+  presetsEl.appendChild(btn);
+});
+
+// Set up JSON syntax editors
+const refreshInput = setupJsonEditor('input', 'hl-input', 'err-input');
+const refreshFlat = setupJsonEditor('input-flat', 'hl-input-flat', 'err-input-flat');
+const refreshHoles = setupJsonEditor('input-holes', 'hl-input-holes', 'err-input-holes');
+
+function refreshAllEditors() {
+  if (refreshInput) refreshInput();
+  if (refreshFlat) refreshFlat();
+  if (refreshHoles) refreshHoles();
+}
+
+loadPreset("with hole");
+
+function loadPreset(name) {
+  setMode('rings');
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  const btns = document.querySelectorAll('.preset-btn');
+  btns.forEach(b => { if (b.textContent === name) b.classList.add('active'); });
+  document.getElementById('input').value = JSON.stringify(PRESETS[name], null, 2);
+  refreshAllEditors();
+  run();
+}
+
+// --- Format JSON ---
+function formatJSON(compact) {
+  if (inputMode === 'rings') {
+    const ta = document.getElementById('input');
+    try {
+      const parsed = jsonParse(ta.value);
+      ta.value = compact ? JSON.stringify(parsed) : JSON.stringify(parsed, null, 2);
+      refreshAllEditors();
+    } catch (_) { /* can't format invalid JSON */ }
+  } else {
+    const flatTa = document.getElementById('input-flat');
+    const holesTa = document.getElementById('input-holes');
+    try {
+      const parsed = jsonParse(flatTa.value);
+      flatTa.value = compact ? JSON.stringify(parsed) : JSON.stringify(parsed, null, 2);
+    } catch (_) {}
+    try {
+      const holesStr = holesTa.value.trim();
+      if (holesStr && holesStr !== '[]') {
+        const parsed = jsonParse(holesStr);
+        holesTa.value = compact ? JSON.stringify(parsed) : JSON.stringify(parsed, null, 2);
+      }
+    } catch (_) {}
+    refreshAllEditors();
+  }
+}
+
+// --- Run ---
+function run() {
+  const status = document.getElementById('status');
+  let vertices, holes, dimensions, rings;
+
+  if (inputMode === 'rings') {
+    // --- Rings mode ---
+    const inputEl = document.getElementById('input');
+    inputEl.classList.remove('has-error');
+
+    let parsed;
+    try {
+      parsed = jsonParse(inputEl.value);
+    } catch (e) {
+      inputEl.classList.add('has-error');
+      status.textContent = 'Invalid JSON: ' + e.message;
+      status.className = 'status-msg error';
+      return;
+    }
+
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      inputEl.classList.add('has-error');
+      status.textContent = 'Expected array of rings';
+      status.className = 'status-msg error';
+      return;
+    }
+
+    for (let i = 0; i < parsed.length; i++) {
+      if (!Array.isArray(parsed[i])) {
+        inputEl.classList.add('has-error');
+        status.textContent = `Ring ${i} is not an array`;
+        status.className = 'status-msg error';
+        return;
+      }
+      for (let j = 0; j < parsed[i].length; j++) {
+        const pt = parsed[i][j];
+        if (!Array.isArray(pt) || pt.length < 2 || typeof pt[0] !== 'number' || typeof pt[1] !== 'number') {
+          inputEl.classList.add('has-error');
+          status.textContent = `Ring ${i}, point ${j}: expected [x, y]`;
+          status.className = 'status-msg error';
+          return;
+        }
+      }
+    }
+
+    const flattenFn = earcutFn.flatten || earcut.flatten;
+    const data = flattenFn(parsed);
+    vertices = data.vertices;
+    holes = data.holes;
+    dimensions = data.dimensions;
+    rings = parsed;
+
+  } else {
+    // --- Flat mode ---
+    const flatEl = document.getElementById('input-flat');
+    const holesEl = document.getElementById('input-holes');
+    flatEl.classList.remove('has-error');
+    holesEl.classList.remove('has-error');
+
+    try {
+      vertices = jsonParse(flatEl.value);
+    } catch (e) {
+      flatEl.classList.add('has-error');
+      status.textContent = 'Vertices: Invalid JSON — ' + e.message;
+      status.className = 'status-msg error';
+      return;
+    }
+
+    if (!Array.isArray(vertices) || vertices.length < 6 || vertices.length % 2 !== 0) {
+      flatEl.classList.add('has-error');
+      status.textContent = 'Vertices: expected flat array [x0,y0, x1,y1, ...] with even length ≥ 6';
+      status.className = 'status-msg error';
+      return;
+    }
+
+    if (!vertices.every(v => typeof v === 'number')) {
+      flatEl.classList.add('has-error');
+      status.textContent = 'Vertices: all entries must be numbers';
+      status.className = 'status-msg error';
+      return;
+    }
+
+    const holesStr = holesEl.value.trim();
+    if (holesStr === '' || holesStr === '[]') {
+      holes = [];
+    } else {
+      try {
+        holes = jsonParse(holesStr);
+      } catch (e) {
+        holesEl.classList.add('has-error');
+        status.textContent = 'Holes: Invalid JSON — ' + e.message;
+        status.className = 'status-msg error';
+        return;
+      }
+      if (!Array.isArray(holes) || !holes.every(h => Number.isInteger(h) && h >= 0)) {
+        holesEl.classList.add('has-error');
+        status.textContent = 'Holes: expected array of non-negative integers';
+        status.className = 'status-msg error';
+        return;
+      }
+    }
+
+    dimensions = 2;
+    rings = flatToRings(vertices, holes, dimensions);
+  }
+
+  // --- Triangulate ---
+  let triangles;
+  const t0 = performance.now();
+  try {
+    triangles = earcutFn(vertices, holes.length ? holes : undefined, dimensions);
+  } catch (e) {
+    status.textContent = 'earcut error: ' + e.message;
+    status.className = 'status-msg error';
+    return;
+  }
+  const dt = (performance.now() - t0).toFixed(2);
+
+  const deviationFn = earcutFn.deviation || earcut.deviation;
+  const dev = deviationFn(vertices, holes.length ? holes : undefined, dimensions, triangles);
+
+  lastData = { vertices, holes, dimensions };
+  lastTriangles = triangles;
+  lastRings = rings;
+
+  // Stats
+  const numTris = triangles.length / 3;
+  const numVerts = vertices.length / 2;
+
+  document.getElementById('stat-tris').textContent = numTris;
+  document.getElementById('stat-verts').textContent = numVerts;
+
+  const devEl = document.getElementById('stat-dev');
+  devEl.textContent = dev.toExponential(4);
+  devEl.className = 'stat-value ' + (dev === 0 ? 'good' : dev < 1e-10 ? 'good' : dev < 0.01 ? 'warn' : 'bad');
+
+  document.getElementById('out-indices').textContent = '[' + triangles.join(', ') + ']';
+  document.getElementById('out-verts').textContent = '[' + vertices.join(', ') + ']';
+  document.getElementById('out-holes').textContent = holes.length ? '[' + holes.join(', ') + ']' : '(none)';
+
+  document.getElementById('output-panel').style.display = '';
+
+  status.textContent = `${numTris} triangles in ${dt}ms — deviation: ${dev.toExponential(2)}`;
+  status.className = 'status-msg ok';
+
+  redraw();
+}
+
+// --- SVG Visualization with zoom/pan ---
+
+function computeBaseViewBox() {
+  if (!lastRings || !lastRings.length) return null;
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const ring of lastRings) {
+    for (const [x, y] of ring) {
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+    }
+  }
+  const w = maxX - minX || 1;
+  const h = maxY - minY || 1;
+  const pad = Math.max(w, h) * 0.08;
+  // Center the content in a square viewBox so shapes aren't stretched
+  const span = Math.max(w, h) + pad * 2;
+  const cx = (minX + maxX) / 2;
+  const cy = (minY + maxY) / 2;
+  return { x: cx - span / 2, y: cy - span / 2, w: span, h: span };
+}
+
+function resetView() {
+  baseVB = computeBaseViewBox();
+  curVB = baseVB ? { ...baseVB } : null;
+  renderSVG();
+  updateZoomLabel();
+}
+
+function getZoomLevel() {
+  if (!baseVB || !curVB) return 1;
+  return baseVB.w / curVB.w;
+}
+
+function updateZoomLabel() {
+  const label = document.getElementById('viz-zoom-label');
+  const z = getZoomLevel();
+  label.textContent = z >= 1 ? `${z.toFixed(1)}×` : `${z.toFixed(2)}×`;
+}
+
+function zoomAt(cx, cy, factor) {
+  if (!curVB) return;
+  // cx, cy are in SVG coordinate space
+  const newW = curVB.w / factor;
+  const newH = curVB.h / factor;
+  // Keep the point under the cursor stationary
+  curVB.x = cx - (cx - curVB.x) / factor;
+  curVB.y = cy - (cy - curVB.y) / factor;
+  curVB.w = newW;
+  curVB.h = newH;
+  renderSVG();
+  updateZoomLabel();
+}
+
+function zoomIn() {
+  if (!curVB) return;
+  const cx = curVB.x + curVB.w / 2;
+  const cy = curVB.y + curVB.h / 2;
+  zoomAt(cx, cy, 1.3);
+}
+
+function zoomOut() {
+  if (!curVB) return;
+  const cx = curVB.x + curVB.w / 2;
+  const cy = curVB.y + curVB.h / 2;
+  zoomAt(cx, cy, 1 / 1.3);
+}
+
+// Convert a mouse event on the SVG element to SVG coordinates
+function mouseToSVG(e) {
+  const svg = document.getElementById('earcut-svg');
+  if (!svg || !curVB) return null;
+  const ctm = svg.getScreenCTM();
+  if (!ctm) return null;
+  const inv = ctm.inverse();
+  return {
+    x: inv.a * e.clientX + inv.c * e.clientY + inv.e,
+    y: inv.b * e.clientX + inv.d * e.clientY + inv.f
+  };
+}
+
+function redraw() {
+  baseVB = computeBaseViewBox();
+  curVB = baseVB ? { ...baseVB } : null;
+  renderSVG();
+  updateZoomLabel();
+}
+
+function renderSVG() {
+  const wrap = document.getElementById('viz-wrap');
+  const empty = document.getElementById('viz-empty');
+  const controls = document.getElementById('viz-controls');
+
+  if (!lastData || !lastTriangles || !curVB) {
+    empty.style.display = '';
+    controls.style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  controls.style.display = '';
+
+  const verts = lastData.vertices;
+  const tris = lastTriangles;
+  const rings = lastRings;
+  const showTris = document.getElementById('chk-tris').checked;
+  const showEdges = document.getElementById('chk-edges').checked;
+  const showVerts = document.getElementById('chk-verts').checked;
+  const showIdx = document.getElementById('chk-idx').checked;
+
+  const vb = curVB;
+  const svgSize = 700;
+  const scale = svgSize / Math.max(vb.w, vb.h);
+  const strokeW = 1.2 / scale;
+  const triStrokeW = 0.6 / scale;
+  const vtxR = 3 / scale;
+  const fontSize = 9 / scale;
+
+  let svg = `<svg viewBox="${vb.x} ${vb.y} ${vb.w} ${vb.h}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" id="earcut-svg">`;
+  svg += `<rect x="${vb.x - vb.w}" y="${vb.y - vb.h}" width="${vb.w * 3}" height="${vb.h * 3}" fill="#0c0e14"/>`;
+
+  // Draw triangles
+  if (showTris) {
+    for (let i = 0; i < tris.length; i += 3) {
+      const ax = verts[tris[i]*2],   ay = verts[tris[i]*2+1];
+      const bx = verts[tris[i+1]*2], by = verts[tris[i+1]*2+1];
+      const cx = verts[tris[i+2]*2], cy = verts[tris[i+2]*2+1];
+      svg += `<polygon points="${ax},${ay} ${bx},${by} ${cx},${cy}" fill="#1a3560" fill-opacity="0.45" stroke="#3a5f9e" stroke-width="${triStrokeW}" stroke-opacity="0.5"/>`;
+    }
+  }
+
+  // Draw ring outlines
+  if (showEdges) {
+    rings.forEach((ring, ri) => {
+      const color = ri === 0 ? '#e8ecf4' : '#e07a5f';
+      const pts = ring.map(p => p[0] + ',' + p[1]).join(' ');
+      svg += `<polygon points="${pts}" fill="none" stroke="${color}" stroke-width="${strokeW}" stroke-linejoin="round"/>`;
+    });
+  }
+
+  // Draw vertices
+  if (showVerts) {
+    let idx = 0;
+    rings.forEach((ring) => {
+      ring.forEach((p) => {
+        svg += `<circle cx="${p[0]}" cy="${p[1]}" r="${vtxR}" fill="#5b8def" stroke="#0c0e14" stroke-width="${vtxR * 0.3}">`;
+        svg += `<title>#${idx} (${p[0]}, ${p[1]})</title></circle>`;
+        if (showIdx) {
+          const tx = p[0];
+          const ty = p[1] - vtxR * 2.2;
+          const padX = fontSize * 0.35;
+          const padY = fontSize * 0.25;
+          const bgW = fontSize * (String(idx).length * 0.62 + 0.6);
+          const bgH = fontSize * 1.25;
+          svg += `<rect x="${tx - bgW/2}" y="${ty - bgH + padY}" width="${bgW}" height="${bgH}" rx="${fontSize * 0.2}" fill="#0c0e14" fill-opacity="0.82"/>`;
+          svg += `<text x="${tx}" y="${ty}" text-anchor="middle" fill="#8ca8d8" font-family="JetBrains Mono, monospace" font-size="${fontSize}">${idx}</text>`;
+        }
+        idx++;
+      });
+    });
+  }
+
+  svg += '</svg>';
+
+  // Remove old SVG, insert new
+  const oldSvg = wrap.querySelector('svg');
+  if (oldSvg) oldSvg.remove();
+  wrap.insertAdjacentHTML('afterbegin', svg);
+
+  // Re-attach mouse listeners to new SVG element
+  attachSVGListeners();
+}
+
+function attachSVGListeners() {
+  const svg = document.getElementById('earcut-svg');
+  if (!svg) return;
+
+  // Wheel → zoom
+  svg.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const pt = mouseToSVG(e);
+    if (!pt) return;
+    const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+    zoomAt(pt.x, pt.y, factor);
+  }, { passive: false });
+
+  // Mouse down → start pan
+  svg.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return;
+    isPanning = true;
+    panStart = { x: e.clientX, y: e.clientY };
+    panVBStart = { ...curVB };
+    const ctm = svg.getScreenCTM();
+    panScale = ctm ? 1 / ctm.a : 1;
+    svg.classList.add('panning');
+    e.preventDefault();
+  });
+
+  // Touch support for pan
+  svg.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) return;
+    isPanning = true;
+    panStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    panVBStart = { ...curVB };
+    const ctm = svg.getScreenCTM();
+    panScale = ctm ? 1 / ctm.a : 1;
+    svg.classList.add('panning');
+  }, { passive: true });
+}
+
+// Global mouse move/up for panning (works even when cursor leaves SVG)
+let panScale = 1; // SVG units per screen pixel, cached on pan start
+
+document.addEventListener('mousemove', (e) => {
+  if (!isPanning || !panVBStart || !curVB) return;
+  const dx = (e.clientX - panStart.x) * panScale;
+  const dy = (e.clientY - panStart.y) * panScale;
+  curVB.x = panVBStart.x - dx;
+  curVB.y = panVBStart.y - dy;
+  renderSVG();
+  updateZoomLabel();
+});
+
+document.addEventListener('mouseup', () => {
+  if (!isPanning) return;
+  isPanning = false;
+  const svg = document.getElementById('earcut-svg');
+  if (svg) svg.classList.remove('panning');
+});
+
+document.addEventListener('touchmove', (e) => {
+  if (!isPanning || !panVBStart || !curVB) return;
+  const dx = (e.touches[0].clientX - panStart.x) * panScale;
+  const dy = (e.touches[0].clientY - panStart.y) * panScale;
+  curVB.x = panVBStart.x - dx;
+  curVB.y = panVBStart.y - dy;
+  renderSVG();
+  updateZoomLabel();
+}, { passive: true });
+
+document.addEventListener('touchend', () => {
+  isPanning = false;
+});
+
+// --- Resizable left column ---
+(function() {
+  const handle = document.getElementById('resize-handle');
+  const layout = document.querySelector('.layout');
+  let isDragging = false;
+  let startX = 0;
+  let startW = 0;
+  const MIN_W = 260;
+  const MAX_RATIO = 0.6; // max 60% of layout width
+
+  handle.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return;
+    isDragging = true;
+    startX = e.clientX;
+    startW = layout.querySelector(':first-child').getBoundingClientRect().width;
+    handle.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - startX;
+    const layoutW = layout.getBoundingClientRect().width;
+    const maxW = layoutW * MAX_RATIO;
+    const newW = Math.max(MIN_W, Math.min(maxW, startW + dx));
+    layout.style.setProperty('--left-w', newW + 'px');
+
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    handle.classList.remove('dragging');
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  });
+
+  // Touch support
+  handle.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) return;
+    isDragging = true;
+    startX = e.touches[0].clientX;
+    startW = layout.querySelector(':first-child').getBoundingClientRect().width;
+    handle.classList.add('dragging');
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    const dx = e.touches[0].clientX - startX;
+    const layoutW = layout.getBoundingClientRect().width;
+    const maxW = layoutW * MAX_RATIO;
+    const newW = Math.max(MIN_W, Math.min(maxW, startW + dx));
+    layout.style.setProperty('--left-w', newW + 'px');
+
+  }, { passive: true });
+
+  document.addEventListener('touchend', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    handle.classList.remove('dragging');
+  });
+
+  // Double-click to reset
+  handle.addEventListener('dblclick', () => {
+    layout.style.setProperty('--left-w', '360px');
+
+  });
+})();
+
+// Keyboard shortcuts on input textareas
+document.querySelectorAll('#input, #input-flat, #input-holes').forEach(el => {
+  el.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      run();
+    }
+    if (e.key === 'f' && e.shiftKey && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      formatJSON();
+    }
+  });
+});
+</script>
+</body>
+</html>
