@@ -716,8 +716,8 @@
 
           <div class="input-footer">
             <button class="run-btn" onclick="run()">Triangulate</button>
-            <button class="fmt-btn" onclick="formatJSON()" title="Pretty-print JSON (Ctrl+Shift+F)">Format</button>
-            <button class="fmt-btn compact" onclick="formatJSON(true)" title="Minify JSON">Compact</button>
+            <button class="fmt-btn" onclick="formatJSON()" title="Compact format, one ring per line (Ctrl+Shift+F)">Format</button>
+            <button class="fmt-btn" onclick="formatJSON(true)" title="Full pretty-print">Pretty</button>
             <span class="status-msg" id="status"></span>
           </div>
         </div>
@@ -1036,6 +1036,12 @@ let isPanning = false;
 let panStart = { x: 0, y: 0 };
 let panVBStart = null;
 
+// Vertex drag state
+let isDraggingVertex = false;
+let dragVertexIdx = -1;  // flat index into lastRings
+let dragRingIdx = -1;
+let dragPointIdx = -1;
+
 function setMode(mode) {
   const prevMode = inputMode;
   inputMode = mode;
@@ -1062,7 +1068,7 @@ function setMode(mode) {
         const holesStr = document.getElementById('input-holes').value.trim();
         const holes = holesStr && holesStr !== '[]' ? jsonParse(holesStr) : [];
         const rings = flatToRings(verts, holes, 2);
-        document.getElementById('input').value = JSON.stringify(rings, null, 2);
+        document.getElementById('input').value = formatRingsCompact(rings);
       } catch (_) { /* leave rings field as-is */ }
     }
     if (typeof refreshAllEditors === 'function') refreshAllEditors();
@@ -1116,18 +1122,30 @@ function loadPreset(name) {
   document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
   const btns = document.querySelectorAll('.preset-btn');
   btns.forEach(b => { if (b.textContent === name) b.classList.add('active'); });
-  document.getElementById('input').value = JSON.stringify(PRESETS[name], null, 2);
+  document.getElementById('input').value = formatRingsCompact(PRESETS[name]);
   refreshAllEditors();
   run();
 }
 
 // --- Format JSON ---
-function formatJSON(compact) {
+
+// Compact-per-ring: each ring on its own line, rings themselves inline
+// [
+//   [[0,0],[100,0],[100,100],[0,100]],
+//   [[20,20],[80,20],[80,80],[20,80]]
+// ]
+function formatRingsCompact(rings) {
+  if (!Array.isArray(rings) || rings.length === 0) return JSON.stringify(rings);
+  const lines = rings.map(ring => '  ' + JSON.stringify(ring));
+  return '[\n' + lines.join(',\n') + '\n]';
+}
+
+function formatJSON(pretty) {
   if (inputMode === 'rings') {
     const ta = document.getElementById('input');
     try {
       const parsed = jsonParse(ta.value);
-      ta.value = compact ? JSON.stringify(parsed) : JSON.stringify(parsed, null, 2);
+      ta.value = pretty ? JSON.stringify(parsed, null, 2) : formatRingsCompact(parsed);
       refreshAllEditors();
     } catch (_) { /* can't format invalid JSON */ }
   } else {
@@ -1135,13 +1153,13 @@ function formatJSON(compact) {
     const holesTa = document.getElementById('input-holes');
     try {
       const parsed = jsonParse(flatTa.value);
-      flatTa.value = compact ? JSON.stringify(parsed) : JSON.stringify(parsed, null, 2);
+      flatTa.value = pretty ? JSON.stringify(parsed, null, 2) : JSON.stringify(parsed);
     } catch (_) {}
     try {
       const holesStr = holesTa.value.trim();
       if (holesStr && holesStr !== '[]') {
         const parsed = jsonParse(holesStr);
-        holesTa.value = compact ? JSON.stringify(parsed) : JSON.stringify(parsed, null, 2);
+        holesTa.value = pretty ? JSON.stringify(parsed, null, 2) : JSON.stringify(parsed);
       }
     } catch (_) {}
     refreshAllEditors();
@@ -1439,9 +1457,16 @@ function renderSVG() {
   // Draw vertices
   if (showVerts) {
     let idx = 0;
-    rings.forEach((ring) => {
-      ring.forEach((p) => {
-        svg += `<circle cx="${p[0]}" cy="${p[1]}" r="${vtxR}" fill="#5b8def" stroke="#0c0e14" stroke-width="${vtxR * 0.3}">`;
+    let ringIdx = 0;
+    rings.forEach((ring, ri) => {
+      ring.forEach((p, pi) => {
+        // Invisible larger hit target for easier dragging
+        svg += `<circle cx="${p[0]}" cy="${p[1]}" r="${vtxR * 3}" fill="transparent" stroke="none" data-vidx="${idx}" data-ring="${ri}" data-pt="${pi}" style="cursor:move;pointer-events:all"/>`;
+        const isActive = isDraggingVertex && idx === dragVertexIdx;
+        if (isActive) {
+          svg += `<circle cx="${p[0]}" cy="${p[1]}" r="${vtxR * 2}" fill="none" stroke="#5b8def" stroke-width="${vtxR * 0.4}" stroke-opacity="0.5"/>`;
+        }
+        svg += `<circle cx="${p[0]}" cy="${p[1]}" r="${isActive ? vtxR * 1.3 : vtxR}" fill="${isActive ? '#7ba8ff' : '#5b8def'}" stroke="#0c0e14" stroke-width="${vtxR * 0.3}" data-vidx="${idx}" data-ring="${ri}" data-pt="${pi}" style="cursor:move;pointer-events:all">`;
         svg += `<title>#${idx} (${p[0]}, ${p[1]})</title></circle>`;
         if (showIdx) {
           const tx = p[0];
@@ -1482,21 +1507,45 @@ function attachSVGListeners() {
     zoomAt(pt.x, pt.y, factor);
   }, { passive: false });
 
-  // Mouse down → start pan
+  // Mouse down → vertex drag or pan
   svg.addEventListener('mousedown', (e) => {
     if (e.button !== 0) return;
+    e.preventDefault();
+
+    // Check if clicking a vertex
+    const vtx = e.target.closest('[data-vidx]');
+    if (vtx) {
+      isDraggingVertex = true;
+      dragRingIdx = parseInt(vtx.dataset.ring);
+      dragPointIdx = parseInt(vtx.dataset.pt);
+      dragVertexIdx = parseInt(vtx.dataset.vidx);
+      document.body.style.cursor = 'move';
+      document.body.style.userSelect = 'none';
+      return;
+    }
+
+    // Otherwise start pan
     isPanning = true;
     panStart = { x: e.clientX, y: e.clientY };
     panVBStart = { ...curVB };
     const ctm = svg.getScreenCTM();
     panScale = ctm ? 1 / ctm.a : 1;
     svg.classList.add('panning');
-    e.preventDefault();
   });
 
-  // Touch support for pan
+  // Touch support for pan (vertex drag on touch is complex, skip for now)
   svg.addEventListener('touchstart', (e) => {
     if (e.touches.length !== 1) return;
+
+    const vtx = e.target.closest('[data-vidx]');
+    if (vtx) {
+      isDraggingVertex = true;
+      dragRingIdx = parseInt(vtx.dataset.ring);
+      dragPointIdx = parseInt(vtx.dataset.pt);
+      dragVertexIdx = parseInt(vtx.dataset.vidx);
+      return;
+    }
+
     isPanning = true;
     panStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     panVBStart = { ...curVB };
@@ -1506,10 +1555,14 @@ function attachSVGListeners() {
   }, { passive: true });
 }
 
-// Global mouse move/up for panning (works even when cursor leaves SVG)
-let panScale = 1; // SVG units per screen pixel, cached on pan start
+// Global mouse move/up for panning and vertex dragging
+let panScale = 1;
 
 document.addEventListener('mousemove', (e) => {
+  if (isDraggingVertex) {
+    moveVertex(e.clientX, e.clientY);
+    return;
+  }
   if (!isPanning || !panVBStart || !curVB) return;
   const dx = (e.clientX - panStart.x) * panScale;
   const dy = (e.clientY - panStart.y) * panScale;
@@ -1520,6 +1573,10 @@ document.addEventListener('mousemove', (e) => {
 });
 
 document.addEventListener('mouseup', () => {
+  if (isDraggingVertex) {
+    commitVertexDrag();
+    return;
+  }
   if (!isPanning) return;
   isPanning = false;
   const svg = document.getElementById('earcut-svg');
@@ -1527,6 +1584,10 @@ document.addEventListener('mouseup', () => {
 });
 
 document.addEventListener('touchmove', (e) => {
+  if (isDraggingVertex && e.touches.length === 1) {
+    moveVertex(e.touches[0].clientX, e.touches[0].clientY);
+    return;
+  }
   if (!isPanning || !panVBStart || !curVB) return;
   const dx = (e.touches[0].clientX - panStart.x) * panScale;
   const dy = (e.touches[0].clientY - panStart.y) * panScale;
@@ -1537,8 +1598,80 @@ document.addEventListener('touchmove', (e) => {
 }, { passive: true });
 
 document.addEventListener('touchend', () => {
+  if (isDraggingVertex) {
+    commitVertexDrag();
+    return;
+  }
   isPanning = false;
 });
+
+// --- Vertex Drag Logic ---
+function moveVertex(clientX, clientY) {
+  const svg = document.getElementById('earcut-svg');
+  if (!svg || !lastRings || !curVB) return;
+  const ctm = svg.getScreenCTM();
+  if (!ctm) return;
+  const inv = ctm.inverse();
+  const svgX = inv.a * clientX + inv.c * clientY + inv.e;
+  const svgY = inv.b * clientX + inv.d * clientY + inv.f;
+
+  // Round to reasonable precision
+  const x = Math.round(svgX * 1000) / 1000;
+  const y = Math.round(svgY * 1000) / 1000;
+
+  // Update rings
+  lastRings[dragRingIdx][dragPointIdx] = [x, y];
+
+  // Re-flatten and re-triangulate
+  const flattenFn = earcutFn.flatten || earcut.flatten;
+  const data = flattenFn(lastRings);
+  lastData = data;
+
+  try {
+    lastTriangles = earcutFn(data.vertices, data.holes.length ? data.holes : undefined, data.dimensions);
+  } catch (_) {
+    // If triangulation fails during drag, keep last good triangles
+  }
+
+  // Update output stats live
+  const numTris = lastTriangles.length / 3;
+  const numVerts = data.vertices.length / 2;
+  document.getElementById('stat-tris').textContent = numTris;
+  document.getElementById('stat-verts').textContent = numVerts;
+
+  const deviationFn = earcutFn.deviation || earcut.deviation;
+  const dev = deviationFn(data.vertices, data.holes.length ? data.holes : undefined, data.dimensions, lastTriangles);
+  const devEl = document.getElementById('stat-dev');
+  devEl.textContent = dev.toExponential(4);
+  devEl.className = 'stat-value ' + (dev === 0 ? 'good' : dev < 1e-10 ? 'good' : dev < 0.01 ? 'warn' : 'bad');
+
+  document.getElementById('out-indices').textContent = '[' + lastTriangles.join(', ') + ']';
+  document.getElementById('out-verts').textContent = '[' + data.vertices.join(', ') + ']';
+  document.getElementById('out-holes').textContent = data.holes.length ? '[' + data.holes.join(', ') + ']' : '(none)';
+
+  renderSVG();
+}
+
+function commitVertexDrag() {
+  isDraggingVertex = false;
+  dragVertexIdx = -1;
+  document.body.style.cursor = '';
+  document.body.style.userSelect = '';
+
+  if (!lastRings) return;
+
+  // Write back to textarea
+  if (inputMode === 'rings') {
+    document.getElementById('input').value = formatRingsCompact(lastRings);
+    refreshAllEditors();
+  } else {
+    const flattenFn = earcutFn.flatten || earcut.flatten;
+    const data = flattenFn(lastRings);
+    document.getElementById('input-flat').value = JSON.stringify(Array.from(data.vertices));
+    document.getElementById('input-holes').value = data.holes.length ? JSON.stringify(data.holes) : '';
+    refreshAllEditors();
+  }
+}
 
 // --- Resizable left column ---
 (function() {
